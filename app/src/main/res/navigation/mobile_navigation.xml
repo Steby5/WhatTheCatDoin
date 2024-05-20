@@ -2,8 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/mobile_navigation"
-	app:startDestination="@+id/navigation_home">
+	app:startDestination="@id/navigation_home">
 
 	<fragment
 		android:id="@+id/navigation_home"
@@ -12,14 +11,21 @@
 		tools:layout="@layout/fragment_home" />
 
 	<fragment
-		android:id="@+id/navigation_dashboard"
-		android:name="si.uni_lj.fe.whatthecatdoin.ui.dashboard.DashboardFragment"
-		android:label="@string/title_dashboard"
-		tools:layout="@layout/fragment_dashboard" />
+		android:id="@+id/navigation_archive"
+		android:name="si.uni_lj.fe.whatthecatdoin.ui.archive.ArchiveFragment"
+		android:label="@string/title_archive"
+		tools:layout="@layout/fragment_archive" />
 
 	<fragment
-		android:id="@+id/navigation_notifications"
-		android:name="si.uni_lj.fe.whatthecatdoin.ui.notifications.NotificationsFragment"
-		android:label="@string/title_notifications"
-		tools:layout="@layout/fragment_notifications" />
+		android:id="@+id/navigation_upload"
+		android:name="si.uni_lj.fe.whatthecatdoin.ui.upload.UploadFragment"
+		android:label="@string/title_upload"
+		tools:layout="@layout/fragment_upload" />
+
+	<fragment
+		android:id="@+id/postDetailFragment"
+		android:name="si.uni_lj.fe.whatthecatdoin.ui.archive.PostDetailFragment"
+		android:label="Post Details"
+		tools:layout="@layout/fragment_post_detail" />
+
 </navigation>

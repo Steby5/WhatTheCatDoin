@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:padding="16dp"
+	android:background="@android:color/black">
+
+	<TextView
+		android:id="@+id/postDetailDate"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_centerHorizontal="true"
+		android:textColor="@android:color/white"
+		android:textSize="16sp"
+		android:textStyle="bold" />
+
+	<ImageView
+		android:id="@+id/postDetailImage"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_marginTop="8dp"
+		android:layout_marginBottom="8dp"
+		android:layout_below="@id/postDetailDate"
+		android:layout_alignParentStart="true"
+		android:layout_alignParentEnd="true"
+		android:layout_centerInParent="true"
+		android:adjustViewBounds="true"
+		android:scaleType="fitCenter"
+		android:layout_weight="1" />
+
+	<TextView
+		android:id="@+id/postDetailLikes"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/postDetailImage"
+		android:layout_alignParentStart="true"
+		android:layout_marginTop="8dp"
+		android:textColor="@android:color/white"
+		android:textSize="16sp" />
+
+	<TextView
+		android:id="@+id/postDetailTags"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/postDetailImage"
+		android:layout_alignParentEnd="true"
+		android:layout_marginTop="8dp"
+		android:textColor="@android:color/white"
+		android:textSize="16sp" />
+</RelativeLayout>

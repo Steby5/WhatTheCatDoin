@@ -4,39 +4,69 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import si.uni_lj.fe.whatthecatdoin.databinding.FragmentHomeBinding
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.firebase.firestore.FirebaseFirestore
+import si.uni_lj.fe.whatthecatdoin.Post
+import si.uni_lj.fe.whatthecatdoin.R
+import si.uni_lj.fe.whatthecatdoin.RecyclerViewAdapter
 
 class HomeFragment : Fragment() {
 
-	private var _binding: FragmentHomeBinding? = null
-
-	// This property is only valid between onCreateView and
-	// onDestroyView.
-	private val binding get() = _binding!!
+	private lateinit var db: FirebaseFirestore
+	private lateinit var recyclerView: RecyclerView
+	private lateinit var adapter: RecyclerViewAdapter
+	private lateinit var postList: MutableList<Post>
+	private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 
 	override fun onCreateView(
-		inflater: LayoutInflater,
-		container: ViewGroup?,
+		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
-	): View {
-		val homeViewModel =
-			ViewModelProvider(this)[HomeViewModel::class.java]
+	): View? {
+		val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-		_binding = FragmentHomeBinding.inflate(inflater, container, false)
-		val root: View = binding.root
+		db = FirebaseFirestore.getInstance()
+		recyclerView = view.findViewById(R.id.recyclerView)
+		swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+		postList = mutableListOf()
+		adapter = RecyclerViewAdapter(postList)
+		recyclerView.layoutManager = LinearLayoutManager(context)
+		recyclerView.adapter = adapter
 
-		val textView: TextView = binding.textHome
-		homeViewModel.text.observe(viewLifecycleOwner) {
-			textView.text = it
+		swipeRefreshLayout.setOnRefreshListener {
+			loadPosts {
+				swipeRefreshLayout.isRefreshing = false
+			}
 		}
-		return root
+
+		loadPosts()
+
+		return view
 	}
 
-	override fun onDestroyView() {
-		super.onDestroyView()
-		_binding = null
+	private fun loadPosts(onComplete: (() -> Unit)? = null) {
+		db.collection("posts").get()
+			.addOnSuccessListener { result ->
+				val uniquePosts = mutableSetOf<Post>()
+				for (document in result) {
+					val post = document.toObject(Post::class.java)
+					uniquePosts.add(post)
+				}
+				postList.clear()
+				postList.addAll(uniquePosts)
+				postList.sortByDescending { it.timestamp }  // Ensure posts are sorted by timestamp
+				adapter.notifyDataSetChanged()
+				onComplete?.invoke()
+			}
+			.addOnFailureListener {
+				onComplete?.invoke()
+			}
+	}
+
+	override fun onResume() {
+		super.onResume()
+		loadPosts()
 	}
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "878623784708",
+    "project_id": "what-the-cat-doin",
+    "storage_bucket": "what-the-cat-doin.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878623784708:android:388c578b4978c85003da51",
+        "android_client_info": {
+          "package_name": "si.uni_lj.fe.whatthecatdoin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfcefmzcs1SPMtMUb25JiOCUTJoD19ylk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
