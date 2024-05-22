@@ -14,58 +14,43 @@ import si.uni_lj.fe.whatthecatdoin.R
 
 class ArchiveFragment : Fragment() {
 
-	private lateinit var db: FirebaseFirestore
-	private lateinit var auth: FirebaseAuth
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var adapter: ArchiveAdapter
-	private lateinit var postList: MutableList<Post>
+	private lateinit var auth: FirebaseAuth
+	private lateinit var db: FirebaseFirestore
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View? {
 		val view = inflater.inflate(R.layout.fragment_archive, container, false)
-
-		db = FirebaseFirestore.getInstance()
-		auth = FirebaseAuth.getInstance()
-		recyclerView = view.findViewById(R.id.ArchiverRecyclerView)
-		postList = mutableListOf()
-		adapter = ArchiveAdapter(postList, this)
+		recyclerView = view.findViewById(R.id.archiveRecyclerView)
 		recyclerView.layoutManager = GridLayoutManager(context, 3)
+		auth = FirebaseAuth.getInstance()
+		db = FirebaseFirestore.getInstance()
+		adapter = ArchiveAdapter { post -> onPostClicked(post) }
 		recyclerView.adapter = adapter
 
-		loadUserPosts()
+		loadPosts()
 
 		return view
 	}
 
-	private fun loadUserPosts() {
-		val currentUser = auth.currentUser?.uid
-		if (currentUser != null) {
-			db.collection("posts").whereEqualTo("profileName", currentUser).get()
-				.addOnSuccessListener { result ->
-					postList.clear()
-					for (document in result) {
-						val post = document.toObject(Post::class.java)
-						postList.add(post)
-					}
-					adapter.notifyDataSetChanged()
+	private fun loadPosts() {
+		val currentUser = auth.currentUser ?: return
+		db.collection("posts")
+			.whereEqualTo("userId", currentUser.uid)
+			.get()
+			.addOnSuccessListener { result ->
+				val posts = result.map { document ->
+					document.toObject(Post::class.java)
 				}
-				.addOnFailureListener { exception ->
-					// Handle error
-					exception.printStackTrace()
-				}
-		} else {
-			// Handle the case where currentUser is null
-			println("User is not authenticated.")
-		}
+				adapter.submitList(posts)
+			}
 	}
 
-	fun showPostDetails(post: Post) {
-		val fragment = PostDetailFragment.newInstance(post)
-		parentFragmentManager.beginTransaction()
-			.replace(R.id.nav_host_fragment_activity_main, fragment)
-			.addToBackStack(null)
-			.commit()
+	private fun onPostClicked(post: Post) {
+		val dialog = PostDetailDialogFragment.newInstance(post)
+		dialog.show(parentFragmentManager, "PostDetailDialog")
 	}
 }

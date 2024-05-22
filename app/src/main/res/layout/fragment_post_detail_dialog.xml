@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:padding="16dp">
-
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/toolbar"
-		android:layout_width="match_parent"
-		android:layout_height="?attr/actionBarSize"
-		android:background="?attr/colorPrimary"
-		android:theme="?attr/actionBarTheme"
-		android:popupTheme="?attr/actionBarPopupTheme"
-		app:navigationIcon="@drawable/ic_back" />
 
 	<ImageView
 		android:id="@+id/detailImageView"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/toolbar"
-		android:scaleType="fitCenter" />
+		android:scaleType="fitCenter"
+		android:layout_alignParentTop="true" />
 
 	<TextView
 		android:id="@+id/detailTimestamp"

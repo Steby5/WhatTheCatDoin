@@ -3,16 +3,18 @@ plugins {
 	id("org.jetbrains.kotlin.android")
 	id("org.jetbrains.kotlin.kapt")
 	id("com.google.gms.google-services")
+	id("com.google.devtools.ksp")
+
 }
 
 android {
 	namespace = "si.uni_lj.fe.whatthecatdoin"  // Add this line
-	compileSdk = 31
+	compileSdk = 34
 
 	defaultConfig {
 		applicationId = "si.uni_lj.fe.whatthecatdoin"
 		minSdk = 26
-		targetSdk = 31
+		targetSdk = 33
 		versionCode = 1
 		versionName = "1.0"
 
@@ -40,27 +42,22 @@ android {
 }
 
 dependencies {
-	implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
-	implementation("androidx.core:core-ktx:1.7.0")
-	implementation("androidx.appcompat:appcompat:1.3.1")
-	implementation("com.google.android.material:material:1.4.0")
-	implementation("androidx.constraintlayout:constraintlayout:2.1.1")
-	implementation("androidx.navigation:navigation-fragment-ktx:2.3.5")
-	implementation("androidx.navigation:navigation-ui-ktx:2.3.5")
+	implementation(libs.kotlin.stdlib)
+	implementation(libs.androidx.core.ktx.v170)
+	implementation(libs.androidx.appcompat.v140)
+	implementation(libs.material.v140)
+	implementation(libs.androidx.constraintlayout.v212)
+	implementation(libs.androidx.navigation.fragment.ktx.v235)
+	implementation(libs.androidx.navigation.ui.ktx.v235)
+	implementation(libs.firebase.auth.ktx)
+	implementation(libs.firebase.firestore.ktx)
+	implementation(libs.firebase.storage.ktx)
+	implementation(libs.glide)
+	implementation(libs.androidx.recyclerview)
+	implementation(libs.androidx.swiperefreshlayout)
+	kapt(libs.compiler)
+	testImplementation(libs.junit)
+	androidTestImplementation(libs.androidx.junit.v113)
+	androidTestImplementation(libs.androidx.espresso.core.v340)
 
-	// Import the BoM for Firebase
-	implementation(platform("com.google.firebase:firebase-bom:28.4.1"))
-
-	// Declare the dependencies without version numbers
-	implementation("com.google.firebase:firebase-auth-ktx")
-	implementation("com.google.firebase:firebase-firestore-ktx")
-	implementation("com.google.firebase:firebase-storage-ktx")
-
-	// Optional dependencies for image loading
-	implementation("com.github.bumptech.glide:glide:4.12.0")
-	kapt("com.github.bumptech.glide:compiler:4.12.0")
-
-	testImplementation("junit:junit:4.13.2")
-	androidTestImplementation("androidx.test.ext:junit:1.1.3")
-	androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
 }

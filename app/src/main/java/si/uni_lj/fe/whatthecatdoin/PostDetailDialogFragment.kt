@@ -1,5 +1,6 @@
 package si.uni_lj.fe.whatthecatdoin.ui.archive
 
+import android.app.Dialog
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -8,9 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -21,35 +20,29 @@ import si.uni_lj.fe.whatthecatdoin.R
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PostDetailFragment : Fragment() {
+class PostDetailDialogFragment : DialogFragment() {
 
 	private lateinit var detailImageView: ImageView
 	private lateinit var detailTimestamp: TextView
 	private lateinit var detailLikes: TextView
 	private lateinit var detailTags: TextView
-	private lateinit var toolbar: Toolbar
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View? {
-		val view = inflater.inflate(R.layout.fragment_post_detail, container, false)
+		val view = inflater.inflate(R.layout.fragment_post_detail_dialog, container, false)
 
 		detailImageView = view.findViewById(R.id.detailImageView)
 		detailTimestamp = view.findViewById(R.id.detailTimestamp)
 		detailLikes = view.findViewById(R.id.detailLikes)
 		detailTags = view.findViewById(R.id.detailTags)
-		toolbar = view.findViewById(R.id.toolbar)
 
 		return view
 	}
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
-
-		toolbar.setNavigationOnClickListener {
-			findNavController().navigateUp()
-		}
 
 		val post = arguments?.getParcelable<Post>("post")
 
@@ -99,8 +92,25 @@ class PostDetailFragment : Fragment() {
 			// Set the likes
 			detailLikes.text = getString(R.string.likes_count, it.likes)
 
-			// Set the tags
-			detailTags.text = if (it.tags.isNotEmpty()) it.tags.joinToString(", ") else getString(R.string.no_tags)
+			// Set the tags with "#" prefix
+			detailTags.text = if (it.tags.isNotEmpty()) it.tags.joinToString(", ") { tag -> "#$tag" } else getString(R.string.no_tags)
+		}
+	}
+
+	override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+		val dialog = super.onCreateDialog(savedInstanceState)
+		dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+		return dialog
+	}
+
+	companion object {
+		fun newInstance(post: Post): PostDetailDialogFragment {
+			val args = Bundle().apply {
+				putParcelable("post", post)
+			}
+			val fragment = PostDetailDialogFragment()
+			fragment.arguments = args
+			return fragment
 		}
 	}
 }

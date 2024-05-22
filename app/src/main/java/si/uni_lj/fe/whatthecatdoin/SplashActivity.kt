@@ -28,6 +28,6 @@ class SplashActivity : AppCompatActivity() {
 	}
 
 	companion object {
-		private const val SPLASH_DISPLAY_LENGTH = 3600L // Duration of the splash screen in milliseconds
+		private const val SPLASH_DISPLAY_LENGTH = 1800L // Duration of the splash screen in milliseconds
 	}
 }

@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class RecyclerViewAdapter(private val postList: List<Post>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
 	private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 	private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -36,7 +36,7 @@ class RecyclerViewAdapter(private val postList: List<Post>) : RecyclerView.Adapt
 		holder.likeCount.text = post.likes.toString()
 
 		if (post.tags.isNotEmpty()) {
-			holder.tags.text = "Tags: ${post.tags.joinToString(" ")}"
+			holder.tags.text = post.tags.joinToString(" ") { tag -> "#$tag" }
 			holder.tags.visibility = View.VISIBLE
 		} else {
 			holder.tags.visibility = View.GONE
@@ -66,6 +66,11 @@ class RecyclerViewAdapter(private val postList: List<Post>) : RecyclerView.Adapt
 	}
 
 	override fun getItemCount(): Int = postList.size
+
+	fun updatePosts(newPostList: List<Post>) {
+		postList = newPostList
+		notifyDataSetChanged()
+	}
 
 	private fun toggleLike(post: Post, holder: ViewHolder) {
 		if (currentUserId != null) {

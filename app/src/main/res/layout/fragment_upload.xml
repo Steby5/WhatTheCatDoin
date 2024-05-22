@@ -1,50 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:gravity="center"
-	android:orientation="vertical"
 	android:padding="16dp">
 
-	<ImageView
-		android:id="@+id/imageView"
-		android:layout_width="match_parent"
-		android:layout_height="200dp"
-		android:layout_marginBottom="16dp"
-		android:contentDescription="Selected Image"
-		android:scaleType="centerCrop"
-		android:background="@android:color/darker_gray" />
-
-	<EditText
-		android:id="@+id/tag1EditText"
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:hint="Tag 1 (max 12 chars)" />
+		android:layout_centerInParent="true"
+		android:orientation="vertical"
+		android:gravity="center_horizontal">
 
-	<EditText
-		android:id="@+id/tag2EditText"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:hint="Tag 2 (max 12 chars)" />
+		<ImageView
+			android:id="@+id/imageView"
+			android:layout_width="match_parent"
+			android:layout_height="200dp"
+			android:layout_marginBottom="16dp"
+			android:background="@drawable/image_placeholder"
+			android:scaleType="fitCenter" />
 
-	<Button
-		android:id="@+id/cameraButton"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:text="Take Photo" />
+		<EditText
+			android:id="@+id/tag1EditText"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="8dp"
+			android:hint="Tag 1" />
 
-	<Button
-		android:id="@+id/galleryButton"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="8dp"
-		android:text="Select from Gallery" />
+		<EditText
+			android:id="@+id/tag2EditText"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="16dp"
+			android:hint="Tag 2" />
 
-	<Button
-		android:id="@+id/uploadButton"
-		android:layout_width="match_parent"
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:layout_marginBottom="16dp"
+			android:gravity="center">
+
+			<LinearLayout
+				android:id="@+id/cameraButton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				android:gravity="center"
+				android:padding="8dp"
+				android:layout_marginEnd="8dp"
+				android:background="@color/primary"
+				android:clickable="true"
+				android:focusable="true">
+
+				<ImageView
+					android:layout_width="24dp"
+					android:layout_height="24dp"
+					android:src="@drawable/ic_camera"
+					android:layout_gravity="center" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Camera"
+					android:layout_gravity="center"
+					android:textAlignment="center" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/galleryButton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical"
+				android:gravity="center"
+				android:padding="8dp"
+				android:layout_marginStart="8dp"
+				android:background="@color/primary"
+				android:clickable="true"
+				android:focusable="true">
+
+				<ImageView
+					android:layout_width="24dp"
+					android:layout_height="24dp"
+					android:src="@drawable/ic_gallery"
+					android:layout_gravity="center" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="Gallery"
+					android:layout_gravity="center"
+					android:textAlignment="center" />
+			</LinearLayout>
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/uploadButton"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:gravity="center"
+			android:padding="8dp"
+			android:background="@color/primary"
+			android:clickable="true"
+			android:focusable="true">
+
+			<ImageView
+				android:id="@+id/uploadIcon"
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:src="@drawable/ic_upload"
+				android:layout_gravity="center" />
+
+			<TextView
+				android:id="@+id/uploadText"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Upload"
+				android:layout_gravity="center"
+				android:textAlignment="center" />
+
+			<ProgressBar
+				android:id="@+id/uploadProgressBar"
+				android:layout_width="38dp"
+				android:layout_height="38dp"
+				android:visibility="gone"
+				android:layout_gravity="center"/>
+		</LinearLayout>
+
+	</LinearLayout>
+
+	<ProgressBar
+		android:id="@+id/progressBar"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:text="Post" />
-</LinearLayout>
+		android:layout_centerInParent="true"
+		android:visibility="gone" />
+</RelativeLayout>

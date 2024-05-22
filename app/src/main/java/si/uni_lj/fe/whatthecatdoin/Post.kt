@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 data class Post(
 	var id: String = "",
+	val userId: String = "",
 	val profileName: String = "",
 	val imageResId: Int? = null,
 	val imageUrl: String? = null,
@@ -13,6 +14,7 @@ data class Post(
 	val timestamp: Long = System.currentTimeMillis()
 ) : Parcelable {
 	constructor(parcel: Parcel) : this(
+		parcel.readString() ?: "",
 		parcel.readString() ?: "",
 		parcel.readString() ?: "",
 		parcel.readValue(Int::class.java.classLoader) as? Int,
@@ -24,6 +26,7 @@ data class Post(
 
 	override fun writeToParcel(parcel: Parcel, flags: Int) {
 		parcel.writeString(id)
+		parcel.writeString(userId)
 		parcel.writeString(profileName)
 		parcel.writeValue(imageResId)
 		parcel.writeString(imageUrl)

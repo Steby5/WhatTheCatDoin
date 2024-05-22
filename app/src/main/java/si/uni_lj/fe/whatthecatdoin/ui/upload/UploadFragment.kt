@@ -5,16 +5,14 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -32,9 +30,13 @@ class UploadFragment : Fragment() {
 	private lateinit var imageView: ImageView
 	private lateinit var tag1EditText: EditText
 	private lateinit var tag2EditText: EditText
-	private lateinit var uploadButton: Button
-	private lateinit var cameraButton: Button
-	private lateinit var galleryButton: Button
+	private lateinit var uploadButton: LinearLayout
+	private lateinit var uploadIcon: ImageView
+	private lateinit var uploadText: TextView
+	private lateinit var uploadProgressBar: ProgressBar
+	private lateinit var cameraButton: LinearLayout
+	private lateinit var galleryButton: LinearLayout
+	private lateinit var progressBar: ProgressBar
 
 	private lateinit var auth: FirebaseAuth
 	private lateinit var db: FirebaseFirestore
@@ -59,8 +61,12 @@ class UploadFragment : Fragment() {
 		tag1EditText = view.findViewById(R.id.tag1EditText)
 		tag2EditText = view.findViewById(R.id.tag2EditText)
 		uploadButton = view.findViewById(R.id.uploadButton)
+		uploadIcon = view.findViewById(R.id.uploadIcon)
+		uploadText = view.findViewById(R.id.uploadText)
+		uploadProgressBar = view.findViewById(R.id.uploadProgressBar)
 		cameraButton = view.findViewById(R.id.cameraButton)
 		galleryButton = view.findViewById(R.id.galleryButton)
+		progressBar = view.findViewById(R.id.progressBar)
 
 		auth = FirebaseAuth.getInstance()
 		db = FirebaseFirestore.getInstance()
@@ -111,6 +117,7 @@ class UploadFragment : Fragment() {
 		), PERMISSION_REQUEST_CODE)
 	}
 
+	@Deprecated("Deprecated in Java")
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 		if (requestCode == PERMISSION_REQUEST_CODE) {
@@ -143,10 +150,17 @@ class UploadFragment : Fragment() {
 		if (selectedImage != null) {
 			val user = auth.currentUser ?: return
 			val userName = user.displayName ?: user.email ?: "Unknown"
+			val userId = user.uid
 			val storageRef = storage.reference.child("images/${UUID.randomUUID()}.jpg")
 			val baos = ByteArrayOutputStream()
 			selectedImage?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
 			val data = baos.toByteArray()
+
+			// Show loading indicator and hide button content
+			uploadIcon.visibility = View.GONE
+			uploadText.visibility = View.GONE
+			uploadProgressBar.visibility = View.VISIBLE
+			uploadButton.isEnabled = false
 
 			storageRef.putBytes(data)
 				.addOnSuccessListener { taskSnapshot ->
@@ -154,6 +168,7 @@ class UploadFragment : Fragment() {
 						val docRef = db.collection("posts").document()
 						val post = Post(
 							id = docRef.id,
+							userId = userId,
 							profileName = userName,
 							imageUrl = uri.toString(),
 							tags = tags,
@@ -164,35 +179,72 @@ class UploadFragment : Fragment() {
 						docRef.set(post)
 							.addOnSuccessListener {
 								Toast.makeText(context, "Post uploaded successfully", Toast.LENGTH_SHORT).show()
+								progressBar.visibility = View.GONE
+								uploadButton.isEnabled = true
 								findNavController().navigate(R.id.navigation_home)
 							}
 							.addOnFailureListener { e ->
 								Toast.makeText(context, "Failed to upload post: ${e.message}", Toast.LENGTH_SHORT).show()
+								progressBar.visibility = View.GONE
+								uploadButton.isEnabled = true
+
+								// Restore button content
+								uploadIcon.visibility = View.VISIBLE
+								uploadText.visibility = View.VISIBLE
+								uploadProgressBar.visibility = View.GONE
 							}
 					}
 				}
 				.addOnFailureListener { e ->
 					Toast.makeText(context, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
+					progressBar.visibility = View.GONE
+					uploadButton.isEnabled = true
+
+					// Restore button content
+					uploadIcon.visibility = View.VISIBLE
+					uploadText.visibility = View.VISIBLE
+					uploadProgressBar.visibility = View.GONE
 				}
 		} else {
 			Toast.makeText(context, "Please select an image", Toast.LENGTH_SHORT).show()
 		}
 	}
 
+	@Deprecated("Deprecated in Java")
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		super.onActivityResult(requestCode, resultCode, data)
 		if (resultCode == Activity.RESULT_OK) {
 			when (requestCode) {
 				CAMERA_REQUEST_CODE -> {
 					selectedImage = data?.extras?.get("data") as Bitmap
+					scaleImage()
 					imageView.setImageBitmap(selectedImage)
 				}
 				GALLERY_REQUEST_CODE -> {
 					val imageUri = data?.data
 					imageView.setImageURI(imageUri)
 					selectedImage = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, imageUri)
+					scaleImage()
 				}
 			}
 		}
+	}
+
+	private fun scaleImage() {
+		val display = requireActivity().windowManager.defaultDisplay
+		val size = Point()
+		display.getSize(size)
+		val width = size.x
+		val height = (size.y * 0.5).toInt()
+
+		val aspectRatio = selectedImage!!.width.toFloat() / selectedImage!!.height.toFloat()
+		val scaledHeight = (width / aspectRatio).toInt()
+
+		if (scaledHeight > height) {
+			imageView.layoutParams.height = height
+		} else {
+			imageView.layoutParams.height = scaledHeight
+		}
+		imageView.requestLayout()
 	}
 }
