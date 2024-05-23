@@ -13,5 +13,5 @@
 	<item
 		android:id="@+id/navigation_upload"
 		android:icon="@drawable/ic_upload"
-		android:title="Profile" />
+		android:title="Upload" />
 </menu>

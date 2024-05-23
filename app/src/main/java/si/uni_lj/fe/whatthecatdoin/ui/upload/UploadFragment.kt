@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputFilter
@@ -77,6 +78,8 @@ class UploadFragment : Fragment() {
 		tag1EditText.filters = filters
 		tag2EditText.filters = filters
 
+		checkPermissions()
+
 		cameraButton.setOnClickListener {
 			if (checkPermissions()) {
 				openCamera()
@@ -102,19 +105,37 @@ class UploadFragment : Fragment() {
 
 	private fun checkPermissions(): Boolean {
 		val cameraPermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
-		val readStoragePermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-		val writeStoragePermission = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+		val readStoragePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_MEDIA_IMAGES)
+		} else {
+			ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+		}
+		val writeStoragePermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			PackageManager.PERMISSION_GRANTED // WRITE_EXTERNAL_STORAGE is not required for Android 13+
+		} else {
+			ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+		}
 		return cameraPermission == PackageManager.PERMISSION_GRANTED &&
 				readStoragePermission == PackageManager.PERMISSION_GRANTED &&
 				writeStoragePermission == PackageManager.PERMISSION_GRANTED
 	}
 
 	private fun requestPermissions() {
-		requestPermissions(arrayOf(
-			Manifest.permission.CAMERA,
-			Manifest.permission.READ_EXTERNAL_STORAGE,
-			Manifest.permission.WRITE_EXTERNAL_STORAGE
-		), PERMISSION_REQUEST_CODE)
+		val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			arrayOf(
+				Manifest.permission.CAMERA,
+				Manifest.permission.READ_MEDIA_IMAGES,
+				Manifest.permission.READ_MEDIA_VIDEO,
+				Manifest.permission.READ_MEDIA_AUDIO
+			)
+		} else {
+			arrayOf(
+				Manifest.permission.CAMERA,
+				Manifest.permission.READ_EXTERNAL_STORAGE,
+				Manifest.permission.WRITE_EXTERNAL_STORAGE
+			)
+		}
+		requestPermissions(permissions, PERMISSION_REQUEST_CODE)
 	}
 
 	@Deprecated("Deprecated in Java")
