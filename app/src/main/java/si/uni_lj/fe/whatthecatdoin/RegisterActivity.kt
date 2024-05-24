@@ -7,6 +7,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
@@ -66,7 +69,13 @@ class RegisterActivity : AppCompatActivity() {
 							}
 					}
 				} else {
-					Toast.makeText(this, "Registration Failed.", Toast.LENGTH_SHORT).show()
+					val errorMessage = when (task.exception) {
+						is FirebaseAuthWeakPasswordException -> "Password is too weak."
+						is FirebaseAuthInvalidCredentialsException -> "Invalid email format."
+						is FirebaseAuthUserCollisionException -> "Email is already in use."
+						else -> "Registration failed: ${task.exception?.message}"
+					}
+					Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
 				}
 			}
 	}

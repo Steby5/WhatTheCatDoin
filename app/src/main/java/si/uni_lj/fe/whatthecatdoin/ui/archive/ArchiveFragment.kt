@@ -11,25 +11,31 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import si.uni_lj.fe.whatthecatdoin.Post
 import si.uni_lj.fe.whatthecatdoin.R
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ArchiveFragment : Fragment() {
 
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var adapter: ArchiveAdapter
-	private lateinit var auth: FirebaseAuth
+	private lateinit var postList: MutableList<Post>
 	private lateinit var db: FirebaseFirestore
+	private lateinit var auth: FirebaseAuth
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View? {
 		val view = inflater.inflate(R.layout.fragment_archive, container, false)
+
 		recyclerView = view.findViewById(R.id.archiveRecyclerView)
-		recyclerView.layoutManager = GridLayoutManager(context, 3)
-		auth = FirebaseAuth.getInstance()
-		db = FirebaseFirestore.getInstance()
-		adapter = ArchiveAdapter { post -> onPostClicked(post) }
+		recyclerView.layoutManager = GridLayoutManager(context, 2)
+		postList = mutableListOf()
+		adapter = ArchiveAdapter { post -> showPostDetailDialog(post) }
 		recyclerView.adapter = adapter
+
+		db = FirebaseFirestore.getInstance()
+		auth = FirebaseAuth.getInstance()
 
 		loadPosts()
 
@@ -37,20 +43,27 @@ class ArchiveFragment : Fragment() {
 	}
 
 	private fun loadPosts() {
-		val currentUser = auth.currentUser ?: return
-		db.collection("posts")
-			.whereEqualTo("userId", currentUser.uid)
-			.get()
+		val userId = auth.currentUser?.uid
+		db.collection("posts").whereEqualTo("userId", userId).get()
 			.addOnSuccessListener { result ->
-				val posts = result.map { document ->
-					document.toObject(Post::class.java)
+				postList.clear()
+				for (document in result) {
+					val post = document.toObject(Post::class.java).copy(id = document.id)
+					postList.add(post)
 				}
-				adapter.submitList(posts)
+				adapter.submitList(postList)
 			}
 	}
 
-	private fun onPostClicked(post: Post) {
-		val dialog = PostDetailDialogFragment.newInstance(post)
-		dialog.show(parentFragmentManager, "PostDetailDialog")
+	private fun showPostDetailDialog(post: Post) {
+		val dialog = PostDetailDialogFragment().apply {
+			arguments = Bundle().apply {
+				putString("imageUrl", post.imageUrl)
+				putInt("likesCount", post.likes)
+				putStringArray("tags", post.tags.toTypedArray())
+				putString("timestamp", SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(post.timestamp)))
+			}
+		}
+		dialog.show(childFragmentManager, "PostDetailDialogFragment")
 	}
 }

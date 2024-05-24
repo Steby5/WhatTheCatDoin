@@ -51,13 +51,13 @@ class HomeFragment : Fragment() {
 			.addOnSuccessListener { result ->
 				val uniquePosts = mutableSetOf<Post>()
 				for (document in result) {
-					val post = document.toObject(Post::class.java)
+					val post = document.toObject(Post::class.java).copy(id = document.id)
 					uniquePosts.add(post)
 				}
 				postList.clear()
 				postList.addAll(uniquePosts)
 				postList.sortByDescending { it.timestamp }  // Ensure posts are sorted by timestamp
-				adapter.notifyDataSetChanged()
+				adapter.updatePosts(postList)
 				onComplete?.invoke()
 			}
 			.addOnFailureListener {

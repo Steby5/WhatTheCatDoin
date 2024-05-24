@@ -20,6 +20,11 @@
 		<activity android:name=".LoginActivity" android:exported="false" />
 		<activity android:name=".RegisterActivity" android:exported="false" />
 		<activity android:name=".MainActivity" android:exported="false" />
+		<activity android:name=".ui.comments.CommentsActivity" android:exported="false" />
+		<activity
+			android:name="com.yalantis.ucrop.UCropActivity"
+			android:screenOrientation="portrait"
+			android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 	</application>
 
 	<uses-permission android:name="android.permission.CAMERA" />
