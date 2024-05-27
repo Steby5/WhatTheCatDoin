@@ -21,4 +21,14 @@
 		android:textAlignment="center"
 		android:textColor="@android:color/white"
 		android:textSize="42sp" />
+	<TextView
+		android:id="@+id/app_version"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true"
+		android:padding="10dp"
+		android:layout_marginBottom="10dp"
+		android:text="App Version:"
+		android:textAlignment="textEnd"
+		android:textColor="@android:color/white"/>
 </RelativeLayout>

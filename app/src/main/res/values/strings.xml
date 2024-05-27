@@ -12,6 +12,7 @@
 	<string name="likes_count">%d likes</string>
 	<string name="no_tags">No tags</string>
 	<string name="archive_image">archive image</string>
+	<string name="title_profile">Profile</string>
 
 </resources>
 

@@ -3,14 +3,17 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
+	android:background="@color/primary"
 	android:padding="16dp"
 	android:layout_marginBottom="16dp">
 
 	<TextView
 		android:id="@+id/profileName"
-		android:layout_width="wrap_content"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Profile Name"
+		android:background="@color/primary_variant"
+		android:padding="8dp"
 		android:textSize="18sp"
 		android:textStyle="bold" />
 
