@@ -15,7 +15,7 @@
 			android:id="@+id/filterButton"
 			android:layout_width="140dp"
 			android:layout_height="wrap_content"
-			android:text="All Posts"
+			android:text="All Cats"
 			android:textColor="@android:color/white"
 			android:layout_gravity="start|center_vertical"
 			android:background="?attr/selectableItemBackground" />
