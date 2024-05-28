@@ -7,9 +7,8 @@ data class Post(
 	var id: String = "",
 	val userId: String = "",
 	val profileName: String = "",
-	val imageResId: Int? = null,
-	val imageUrl: String? = null,
-	val tags: List<String> = listOf(),
+	val imageUrl: String = "",
+	val description: String = "",
 	var likes: Int = 0,
 	val timestamp: Long = System.currentTimeMillis()
 ) : Parcelable {
@@ -17,9 +16,8 @@ data class Post(
 		parcel.readString() ?: "",
 		parcel.readString() ?: "",
 		parcel.readString() ?: "",
-		parcel.readValue(Int::class.java.classLoader) as? Int,
-		parcel.readString(),
-		parcel.createStringArrayList() ?: listOf(),
+		parcel.readString() ?: "",
+		parcel.readString() ?: "",
 		parcel.readInt(),
 		parcel.readLong()
 	)
@@ -28,9 +26,8 @@ data class Post(
 		parcel.writeString(id)
 		parcel.writeString(userId)
 		parcel.writeString(profileName)
-		parcel.writeValue(imageResId)
 		parcel.writeString(imageUrl)
-		parcel.writeStringList(tags)
+		parcel.writeString(description)
 		parcel.writeInt(likes)
 		parcel.writeLong(timestamp)
 	}

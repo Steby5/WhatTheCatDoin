@@ -11,16 +11,6 @@
 		tools:layout="@layout/fragment_home" />
 
 	<fragment
-		android:id="@+id/navigation_archive"
-		android:name="si.uni_lj.fe.whatthecatdoin.ui.archive.ArchiveFragment"
-		android:label="@string/title_archive"
-		tools:layout="@layout/fragment_archive">
-		<action
-			android:id="@+id/action_archiveFragment_to_postDetailFragment"
-			app:destination="@id/postDetailFragment" />
-	</fragment>
-
-	<fragment
 		android:id="@+id/navigation_upload"
 		android:name="si.uni_lj.fe.whatthecatdoin.ui.upload.UploadFragment"
 		android:label="@string/title_upload"

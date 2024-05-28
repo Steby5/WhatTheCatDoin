@@ -23,7 +23,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 	inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 		val profileName: TextView = itemView.findViewById(R.id.profileName)
 		val postImage: ImageView = itemView.findViewById(R.id.postImage)
-		val tags: TextView = itemView.findViewById(R.id.tags)
+		val description: TextView = itemView.findViewById(R.id.description)
 		val likeButton: ImageButton = itemView.findViewById(R.id.likeButton)
 		val likeCount: TextView = itemView.findViewById(R.id.likeCount)
 		val commentButton: ImageButton = itemView.findViewById(R.id.commentButton)
@@ -39,22 +39,14 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 		val post = postList[position]
 		holder.profileName.text = post.profileName
 		holder.likeCount.text = post.likes.toString()
+		holder.description.text = post.description
 
-		if (post.tags.isNotEmpty()) {
-			holder.tags.text = post.tags.joinToString(" ") { tag -> "#$tag" }
-			holder.tags.visibility = View.VISIBLE
-		} else {
-			holder.tags.visibility = View.GONE
-		}
-
-		if (post.imageResId != null) {
-			holder.postImage.setImageResource(post.imageResId)
-		} else if (post.imageUrl != null) {
+		if (post.imageUrl.isNotEmpty()) {
 			Glide.with(holder.itemView.context).load(post.imageUrl).into(holder.postImage)
 		}
 
 		if (currentUserId != null) {
-			val postRef = db.collection("posts").document(post.id) // Ensure document ID is used
+			val postRef = db.collection("posts").document(post.id)
 			postRef.collection("likes").document(currentUserId)
 				.get()
 				.addOnSuccessListener { document ->
@@ -103,7 +95,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 	private fun toggleLike(post: Post, holder: ViewHolder) {
 		if (currentUserId != null) {
-			val postRef = db.collection("posts").document(post.id) // Ensure document ID is used
+			val postRef = db.collection("posts").document(post.id)
 			val likeRef = postRef.collection("likes").document(currentUserId)
 			likeRef.get().addOnSuccessListener { document ->
 				if (document.exists()) {
@@ -126,7 +118,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 	}
 
 	private fun updatePostLikes(post: Post) {
-		db.collection("posts").document(post.id) // Ensure document ID is used
+		db.collection("posts").document(post.id)
 			.update("likes", post.likes)
 			.addOnSuccessListener {
 				// Successfully updated likes

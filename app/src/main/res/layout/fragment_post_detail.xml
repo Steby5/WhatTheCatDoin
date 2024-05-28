@@ -1,47 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:padding="16dp">
+	android:orientation="vertical">
 
 	<androidx.appcompat.widget.Toolbar
 		android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
-		android:background="?attr/colorPrimary"
-		android:theme="?attr/actionBarTheme"
-		android:popupTheme="?attr/actionBarPopupTheme"
-		app:navigationIcon="@drawable/ic_back" />
+		android:background="@color/primary"
+		app:navigationIcon="@drawable/ic_back"
+		app:title="Post Details"
+		app:titleTextColor="@android:color/white" />
 
-	<ImageView
-		android:id="@+id/detailImageView"
+	<ScrollView
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/toolbar"
-		android:scaleType="fitCenter" />
+		android:layout_height="match_parent"
+		android:padding="16dp">
 
-	<TextView
-		android:id="@+id/detailTimestamp"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/detailImageView"
-		android:layout_marginTop="8dp"
-		android:text="Timestamp" />
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
 
-	<TextView
-		android:id="@+id/detailLikes"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/detailTimestamp"
-		android:layout_marginTop="8dp"
-		android:text="Likes" />
+			<ImageView
+				android:id="@+id/postImageView"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:adjustViewBounds="true"
+				android:contentDescription="TODO"
+				android:scaleType="fitCenter"
+				android:background="@drawable/image_placeholder" />
 
-	<TextView
-		android:id="@+id/detailTags"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/detailLikes"
-		android:layout_marginTop="8dp"
-		android:text="Tags" />
-</RelativeLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Likes: "
+					android:textSize="16sp" />
+				<TextView
+					android:id="@+id/likes_count"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Likes Count"
+					android:textSize="16sp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Description: "
+					android:textSize="16sp" />
+				<TextView
+					android:id="@+id/description"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Description"
+					android:textSize="14sp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="left">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Uploaded: "
+					android:textSize="16sp" />
+				<TextView
+					android:id="@+id/timestamp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="8dp"
+					android:text="Timestamp"
+					android:textSize="14sp" />
+			</LinearLayout>
+
+		</LinearLayout>
+
+	</ScrollView>
+
+</LinearLayout>

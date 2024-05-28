@@ -13,12 +13,13 @@
 
 		<Button
 			android:id="@+id/filterButton"
-			android:layout_width="140dp"
+			android:layout_width="130dp"
+			android:padding="5dp"
 			android:layout_height="wrap_content"
 			android:text="All Cats"
+			android:gravity="center_horizontal|center_vertical"
 			android:textColor="@android:color/white"
-			android:layout_gravity="start|center_vertical"
-			android:background="?attr/selectableItemBackground" />
+			android:background="@color/primary_variant" />
 	</androidx.appcompat.widget.Toolbar>
 
 	<androidx.swiperefreshlayout.widget.SwipeRefreshLayout

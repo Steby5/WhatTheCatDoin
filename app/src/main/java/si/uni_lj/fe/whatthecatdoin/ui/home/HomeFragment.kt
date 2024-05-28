@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
 
 		filterButton.setOnClickListener {
 			showAllPosts = !showAllPosts
-			filterButton.text = if (showAllPosts) "All Posts" else "Following"
+			filterButton.text = if (showAllPosts) "All Cats" else "Followed Cats"
 			loadPosts()
 		}
 

@@ -23,8 +23,17 @@
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
 		android:adjustViewBounds="true"
+		android:contentDescription="TODO"
 		android:scaleType="fitCenter"
 		android:src="@drawable/image_placeholder" />
+
+	<TextView
+		android:id="@+id/description"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:text="Description"
+		android:textSize="14sp" />
 
 	<LinearLayout
 		android:layout_width="match_parent"
@@ -34,52 +43,89 @@
 		android:padding="8dp"
 		android:background="@color/secondary">
 
-		<ImageButton
-			android:id="@+id/likeButton"
-			android:layout_width="36dp"
-			android:layout_height="36dp"
-			android:layout_gravity="center_vertical"
-			android:scaleType="fitCenter"
-			android:background="?android:attr/selectableItemBackgroundBorderless"
-			android:src="@drawable/heart" />
-
-		<TextView
-			android:id="@+id/likeCount"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_vertical"
-			android:layout_marginStart="8dp"
-			android:text="0"
-			android:textSize="14sp" />
-
-		<ImageButton
-			android:id="@+id/commentButton"
-			android:layout_width="36dp"
-			android:layout_height="36dp"
-			android:layout_gravity="center_vertical"
-			android:layout_marginStart="16dp"
-			android:scaleType="fitCenter"
-			android:background="?android:attr/selectableItemBackgroundBorderless"
-			android:src="@drawable/ic_comment" />
-
-		<ImageButton
-			android:id="@+id/followButton"
-			android:layout_width="36dp"
-			android:layout_height="36dp"
-			android:layout_gravity="center_vertical"
-			android:layout_marginStart="16dp"
-			android:scaleType="fitCenter"
-			android:background="?android:attr/selectableItemBackgroundBorderless"
-			android:src="@drawable/ic_follow" />
-
-		<TextView
-			android:id="@+id/tags"
+		<LinearLayout
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_weight="1"
-			android:gravity="end|center_vertical"
-			android:text="Tags: #example #tags"
-			android:textSize="14sp"
-			android:visibility="gone" />
+			android:orientation="horizontal"
+			android:layout_gravity="center_vertical"
+			android:gravity="center_horizontal">
+
+			<ImageButton
+				android:id="@+id/likeButton"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_gravity="center_vertical"
+				android:contentDescription="TODO"
+				android:scaleType="fitCenter"
+				android:background="?android:attr/selectableItemBackgroundBorderless"
+				android:src="@drawable/heart" />
+
+			<TextView
+				android:id="@+id/likeCount"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:layout_marginStart="8dp"
+				android:text="0"
+				android:textSize="14sp" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="horizontal"
+			android:layout_gravity="center_vertical"
+			android:gravity="center_horizontal">
+
+			<ImageButton
+				android:id="@+id/commentButton"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_gravity="center_vertical"
+				android:contentDescription="TODO"
+				android:scaleType="fitCenter"
+				android:background="?android:attr/selectableItemBackgroundBorderless"
+				android:src="@drawable/ic_comment" />
+
+			<TextView
+				android:id="@+id/commentCount"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:layout_marginStart="8dp"
+				android:text="0"
+				android:textSize="14sp" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="horizontal"
+			android:layout_gravity="center_vertical"
+			android:gravity="center_horizontal">
+
+			<ImageButton
+				android:id="@+id/followButton"
+				android:layout_width="36dp"
+				android:layout_height="36dp"
+				android:layout_gravity="center_vertical"
+				android:contentDescription="TODO"
+				android:scaleType="fitCenter"
+				android:background="?android:attr/selectableItemBackgroundBorderless"
+				android:src="@drawable/ic_follow" />
+
+			<TextView
+				android:id="@+id/followCount"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_vertical"
+				android:layout_marginStart="8dp"
+				android:text="0"
+				android:textSize="14sp" />
+		</LinearLayout>
+
 	</LinearLayout>
 </LinearLayout>

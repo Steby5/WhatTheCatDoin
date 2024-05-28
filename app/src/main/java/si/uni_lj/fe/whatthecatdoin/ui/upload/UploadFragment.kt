@@ -2,32 +2,31 @@ package si.uni_lj.fe.whatthecatdoin.ui.upload
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.yalantis.ucrop.UCrop
+import si.uni_lj.fe.whatthecatdoin.MainActivity
 import si.uni_lj.fe.whatthecatdoin.Post
 import si.uni_lj.fe.whatthecatdoin.R
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 
 class UploadFragment : Fragment() {
 
 	private lateinit var imageView: ImageView
-	private lateinit var tag1EditText: EditText
-	private lateinit var tag2EditText: EditText
+	private lateinit var descriptionEditText: EditText
 	private lateinit var progressBar: ProgressBar
 	private lateinit var uploadButton: LinearLayout
 	private lateinit var cameraButton: LinearLayout
@@ -48,8 +47,7 @@ class UploadFragment : Fragment() {
 		val view = inflater.inflate(R.layout.fragment_upload, container, false)
 
 		imageView = view.findViewById(R.id.imageView)
-		tag1EditText = view.findViewById(R.id.tag1EditText)
-		tag2EditText = view.findViewById(R.id.tag2EditText)
+		descriptionEditText = view.findViewById(R.id.descriptionEditText)
 		progressBar = view.findViewById(R.id.progressBar)
 		uploadButton = view.findViewById(R.id.uploadButton)
 		cameraButton = view.findViewById(R.id.cameraButton)
@@ -123,34 +121,39 @@ class UploadFragment : Fragment() {
 			return
 		}
 
-		val tag1 = tag1EditText.text.toString().trim()
-		val tag2 = tag2EditText.text.toString().trim()
+		val description = descriptionEditText.text.toString().trim()
 
 		progressBar.visibility = View.VISIBLE
 		uploadButton.isEnabled = false
 
 		val userId = auth.currentUser?.uid ?: return
-		val storageRef = storage.reference.child("images/${UUID.randomUUID()}.jpg")
+		val postId = UUID.randomUUID().toString()
+		val storageRef = storage.reference.child("images/$postId.jpg")
 
 		storageRef.putFile(imageUri!!)
 			.addOnSuccessListener {
 				storageRef.downloadUrl.addOnSuccessListener { uri ->
 					val post = Post(
+						id = postId,
 						userId = userId,
 						profileName = auth.currentUser?.displayName ?: "Anonymous",
 						imageUrl = uri.toString(),
-						tags = listOfNotNull(tag1.takeIf { it.isNotEmpty() }, tag2.takeIf { it.isNotEmpty() }),
+						description = description,
 						likes = 0,
 						timestamp = System.currentTimeMillis()
 					)
-					db.collection("posts").add(post)
+					db.collection("posts").document(postId).set(post)
 						.addOnSuccessListener {
 							progressBar.visibility = View.GONE
 							uploadButton.isEnabled = true
 							Toast.makeText(context, "Post uploaded", Toast.LENGTH_SHORT).show()
 							imageView.setImageResource(R.drawable.image_placeholder)
-							tag1EditText.text.clear()
-							tag2EditText.text.clear()
+							descriptionEditText.text.clear()
+							// Redirect to home screen
+							val intent = Intent(context, MainActivity::class.java)
+							intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+							startActivity(intent)
+							requireActivity().finish()
 						}
 						.addOnFailureListener {
 							progressBar.visibility = View.GONE
@@ -164,5 +167,32 @@ class UploadFragment : Fragment() {
 				uploadButton.isEnabled = true
 				Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
 			}
+	}
+
+
+	companion object {
+		private const val REQUEST_CODE_PERMISSIONS = 10
+		private val REQUIRED_PERMISSIONS = arrayOf(
+			android.Manifest.permission.CAMERA,
+			android.Manifest.permission.READ_EXTERNAL_STORAGE,
+			android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+		)
+	}
+
+	private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+		ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+	}
+
+	override fun onRequestPermissionsResult(
+		requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+	) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+		if (requestCode == REQUEST_CODE_PERMISSIONS) {
+			if (allPermissionsGranted()) {
+				// Permissions granted, open camera or gallery based on the button click
+			} else {
+				// If permissions are not granted, you can show a message
+			}
+		}
 	}
 }

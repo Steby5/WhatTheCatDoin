@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import si.uni_lj.fe.whatthecatdoin.ui.updateExistingPosts
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,5 +22,7 @@ class MainActivity : AppCompatActivity() {
 
 		val bottomNavigationView: BottomNavigationView = findViewById(R.id.nav_view)
 		NavigationUI.setupWithNavController(bottomNavigationView, navController)
+
+		updateExistingPosts()
 	}
 }
