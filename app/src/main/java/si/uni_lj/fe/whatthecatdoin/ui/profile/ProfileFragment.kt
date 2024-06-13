@@ -1,23 +1,33 @@
 package si.uni_lj.fe.whatthecatdoin.ui.profile
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.yalantis.ucrop.UCrop
 import si.uni_lj.fe.whatthecatdoin.Post
 import si.uni_lj.fe.whatthecatdoin.R
 import si.uni_lj.fe.whatthecatdoin.RegisterActivity
 import si.uni_lj.fe.whatthecatdoin.ui.archive.ArchiveAdapter
 import si.uni_lj.fe.whatthecatdoin.ui.archive.PostDetailFragment
+import java.io.File
 
 class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 
@@ -28,7 +38,10 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 	private lateinit var auth: FirebaseAuth
 	private lateinit var usernameTextView: TextView
 	private lateinit var logoutButton: TextView
+	private lateinit var profileImageView: ImageView
+	private lateinit var storage: FirebaseStorage
 	private lateinit var scrollToTopButton: FloatingActionButton
+	private val PICK_IMAGE_REQUEST = 1
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -38,9 +51,11 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 
 		db = FirebaseFirestore.getInstance()
 		auth = FirebaseAuth.getInstance()
+		storage = FirebaseStorage.getInstance()
 
 		usernameTextView = view.findViewById(R.id.usernameTextView)
 		logoutButton = view.findViewById(R.id.logoutButton)
+		profileImageView = view.findViewById(R.id.profileImageView)
 		recyclerView = view.findViewById(R.id.archiveRecyclerView)
 		recyclerView.layoutManager = GridLayoutManager(context, 2)
 		postList = mutableListOf()
@@ -49,6 +64,7 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		scrollToTopButton = view.findViewById(R.id.scrollToTopButton)
 
 		loadPosts()
+		loadProfileImage()
 
 		auth.currentUser?.let { user ->
 			usernameTextView.text = user.displayName
@@ -56,6 +72,7 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 
 		usernameTextView.setOnClickListener { showPopupMenu() }
 		logoutButton.setOnClickListener { logout() }
+		profileImageView.setOnClickListener { openImageSelector() }
 		scrollToTopButton.setOnClickListener {
 			recyclerView.smoothScrollToPosition(0)
 		}
@@ -92,6 +109,94 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		}
 	}
 
+	private fun loadProfileImage() {
+		val userId = auth.currentUser?.uid
+		if (userId != null) {
+			db.collection("users").document(userId).get()
+				.addOnSuccessListener { document ->
+					if (document.exists()) {
+						val profileImageUrl = document.getString("profileImageUrl")
+						profileImageUrl?.let {
+							Glide.with(this).load(it).into(profileImageView)
+						}
+					}
+				}
+		}
+	}
+
+	private fun openImageSelector() {
+		val intent = Intent(Intent.ACTION_GET_CONTENT)
+		intent.type = "image/*"
+		startActivityForResult(intent, PICK_IMAGE_REQUEST)
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		super.onActivityResult(requestCode, resultCode, data)
+		if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+			val imageUri = data?.data
+			imageUri?.let { startCrop(it) }
+		} else if (requestCode == UCrop.REQUEST_CROP && resultCode == Activity.RESULT_OK) {
+			val resultUri = UCrop.getOutput(data!!)
+			resultUri?.let { uploadImageToFirebase(it) }
+		}
+	}
+
+	private fun startCrop(uri: Uri) {
+		val destinationUri = Uri.fromFile(File(context?.cacheDir, "profile_image_crop.jpg"))
+		val options = UCrop.Options()
+		options.setCircleDimmedLayer(true)
+		options.setShowCropGrid(false)
+		options.setShowCropFrame(false)
+		UCrop.of(uri, destinationUri)
+			.withAspectRatio(1f, 1f)
+			.withMaxResultSize(500, 500)
+			.withOptions(options)
+			.start(requireContext(), this)
+	}
+
+	private fun uploadImageToFirebase(uri: Uri) {
+		val userId = auth.currentUser?.uid
+		val storageRef = storage.reference.child("profile_images/$userId.jpg")
+		storageRef.putFile(uri)
+			.addOnSuccessListener {
+				storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+					saveProfileImageUrl(downloadUri.toString())
+				}
+			}
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+	}
+
+	private fun saveProfileImageUrl(url: String) {
+		val userId = auth.currentUser?.uid
+		if (userId != null) {
+			db.collection("users").document(userId)
+				.update("profileImageUrl", url)
+				.addOnSuccessListener {
+					Toast.makeText(context, "Profile image updated", Toast.LENGTH_SHORT).show()
+					loadProfileImage()
+					updateProfileImageInPosts(url)
+				}
+				.addOnFailureListener { e ->
+					Toast.makeText(context, "Failed to update profile image URL: ${e.message}", Toast.LENGTH_SHORT).show()
+				}
+		}
+	}
+
+	private fun updateProfileImageInPosts(url: String) {
+		val userId = auth.currentUser?.uid
+		if (userId != null) {
+			db.collection("posts").whereEqualTo("userId", userId).get()
+				.addOnSuccessListener { result ->
+					for (document in result) {
+						db.collection("posts").document(document.id)
+							.update("profileImageUrl", url)
+					}
+				}
+		}
+	}
+
 	private fun showPostDetail(post: Post) {
 		val dialogFragment = PostDetailFragment.newInstance(post)
 		dialogFragment.setTargetFragment(this, 0)
@@ -99,15 +204,15 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 	}
 
 	private fun showPopupMenu() {
-		val popupMenu = PopupMenu(context, usernameTextView)
+		val popupMenu = PopupMenu(context as Context, usernameTextView)
 		popupMenu.menuInflater.inflate(R.menu.profile_menu, popupMenu.menu)
 		popupMenu.setOnMenuItemClickListener { item ->
 			when (item.itemId) {
 				R.id.changeUsername -> changeUsername()
 				R.id.changeEmail -> changeEmail()
 				R.id.changePassword -> changePassword()
-				R.id.deleteAccount -> deleteAccount()
-				R.id.banUser -> showBanUserDialog()
+				R.id.deleteAccount -> showDeleteAccountConfirmationDialog()
+				R.id.banUser -> banUser()
 			}
 			true
 		}
@@ -134,59 +239,65 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		// Implement change password functionality
 	}
 
-	private fun deleteAccount() {
-		// Implement delete account functionality
-	}
-
-	private fun showBanUserDialog() {
-		val usersRef = db.collection("users")
-		val usersList = mutableListOf<String>()
-		val usersIdList = mutableListOf<String>()
-
-		usersRef.get().addOnSuccessListener { result ->
-			for (document in result) {
-				val username = document.getString("username") ?: "Unknown"
-				usersList.add(username)
-				usersIdList.add(document.id)
-			}
-
-			val builder = AlertDialog.Builder(requireContext())
-			builder.setTitle("Select a user to ban")
-			builder.setItems(usersList.toTypedArray()) { _, which ->
-				val userIdToBan = usersIdList[which]
-				showBanConfirmationDialog(userIdToBan)
-			}
-			builder.show()
-		}
-	}
-
-	private fun showBanConfirmationDialog(userIdToBan: String) {
-		AlertDialog.Builder(requireContext())
-			.setMessage("Are you sure you want to ban this user?")
-			.setPositiveButton("Ban") { _, _ ->
-				banUser(userIdToBan)
-			}
+	private fun showDeleteAccountConfirmationDialog() {
+		AlertDialog.Builder(context)
+			.setMessage("Are you sure you want to delete your account? \n\nTHIS CANNOT BE UNDONE!")
+			.setPositiveButton("Delete") { _, _ -> deleteUser(auth.currentUser?.uid) }
 			.setNegativeButton("Cancel", null)
 			.show()
 	}
 
-	private fun banUser(userIdToBan: String) {
-		val userRef = db.collection("users").document(userIdToBan)
-		val postsRef = db.collection("posts").whereEqualTo("userId", userIdToBan)
-
-		// Delete all posts by the user
-		postsRef.get().addOnSuccessListener { result ->
-			for (document in result) {
-				document.reference.delete()
+	private fun deleteUser(userId: String?) {
+		if (userId == null) return
+		db.collection("users").document(userId).delete()
+			.addOnSuccessListener {
+				db.collection("posts").whereEqualTo("userId", userId).get()
+					.addOnSuccessListener { result ->
+						for (document in result) {
+							db.collection("posts").document(document.id).delete()
+						}
+					}
+				auth.currentUser?.delete()
+					?.addOnCompleteListener { task ->
+						if (task.isSuccessful) {
+							Toast.makeText(context, "Account deleted", Toast.LENGTH_SHORT).show()
+							startActivity(Intent(context, RegisterActivity::class.java))
+							activity?.finish()
+						} else {
+							Toast.makeText(context, "Failed to delete account", Toast.LENGTH_SHORT).show()
+						}
+					}
 			}
-
-			// Delete the user document
-			userRef.delete().addOnSuccessListener {
-				Toast.makeText(context, "User banned successfully", Toast.LENGTH_SHORT).show()
-			}.addOnFailureListener { e ->
-				Toast.makeText(context, "Failed to ban user: ${e.message}", Toast.LENGTH_SHORT).show()
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to delete user: ${e.message}", Toast.LENGTH_SHORT).show()
 			}
-		}
+	}
+
+	private fun banUser() {
+		val userId = auth.currentUser?.uid ?: return
+		db.collection("users").get()
+			.addOnSuccessListener { result ->
+				val users = result.documents.filter { it.id != userId }
+				val userNames = users.map { it.getString("username") ?: "Unknown" }.toTypedArray()
+				val userIds = users.map { it.id }.toTypedArray()
+
+				AlertDialog.Builder(context)
+					.setTitle("Select a user to ban")
+					.setItems(userNames) { _, which ->
+						val selectedUserId = userIds[which]
+						showBanConfirmationDialog(selectedUserId)
+					}
+					.setNegativeButton("Cancel", null)
+					.show()
+			}
+	}
+
+	private fun showBanConfirmationDialog(userId: String) {
+		AlertDialog.Builder(context)
+			.setMessage("Are you sure you want to ban this user?")
+			.setPositiveButton("Ban") { _, _ -> deleteUser(userId) }
+			.setNegativeButton("Cancel", null)
+			.show()
 	}
 
 	private fun logout() {

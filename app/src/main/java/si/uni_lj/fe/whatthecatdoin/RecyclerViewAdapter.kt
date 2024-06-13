@@ -21,7 +21,6 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 	private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 	private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-	private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 	private val currentUserId = auth.currentUser?.uid
 	private var isAdmin: Boolean = false
 
@@ -34,6 +33,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 	inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 		val profileName: TextView = itemView.findViewById(R.id.profileName)
+		val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
 		val postImage: ImageView = itemView.findViewById(R.id.postImage)
 		val description: TextView = itemView.findViewById(R.id.description)
 		val likeButton: ImageButton = itemView.findViewById(R.id.likeButton)
@@ -61,6 +61,16 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 		if (post.imageUrl.isNotEmpty()) {
 			Glide.with(holder.itemView.context).load(post.imageUrl).into(holder.postImage)
 		}
+
+		db.collection("users").document(post.userId).get()
+			.addOnSuccessListener { document ->
+				if (document.exists()) {
+					val profileImageUrl = document.getString("profileImageUrl")
+					profileImageUrl?.let {
+						Glide.with(holder.itemView.context).load(it).into(holder.profileImage)
+					}
+				}
+			}
 
 		if (currentUserId != null) {
 			val postRef = db.collection("posts").document(post.id)
@@ -206,7 +216,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 	private fun deletePost(post: Post, holder: ViewHolder) {
 		val postRef = db.collection("posts").document(post.id)
-		val imageRef = storage.getReferenceFromUrl(post.imageUrl)
+		val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(post.imageUrl)
 
 		// Delete image from Firebase Storage
 		imageRef.delete()
