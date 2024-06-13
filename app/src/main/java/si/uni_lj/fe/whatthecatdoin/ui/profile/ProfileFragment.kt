@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.*
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +28,7 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 	private lateinit var auth: FirebaseAuth
 	private lateinit var usernameTextView: TextView
 	private lateinit var logoutButton: TextView
-	private lateinit var fabScrollToTop: FloatingActionButton
+	private lateinit var scrollToTopButton: FloatingActionButton
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -40,32 +42,33 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		usernameTextView = view.findViewById(R.id.usernameTextView)
 		logoutButton = view.findViewById(R.id.logoutButton)
 		recyclerView = view.findViewById(R.id.archiveRecyclerView)
-		fabScrollToTop = view.findViewById(R.id.fabScrollToTop)
 		recyclerView.layoutManager = GridLayoutManager(context, 2)
 		postList = mutableListOf()
 		adapter = ArchiveAdapter { post -> showPostDetail(post) }
 		recyclerView.adapter = adapter
+		scrollToTopButton = view.findViewById(R.id.scrollToTopButton)
 
 		loadPosts()
-		usernameTextView.text = auth.currentUser?.displayName
+
+		auth.currentUser?.let { user ->
+			usernameTextView.text = user.displayName
+		}
+
 		usernameTextView.setOnClickListener { showPopupMenu() }
 		logoutButton.setOnClickListener { logout() }
+		scrollToTopButton.setOnClickListener {
+			recyclerView.smoothScrollToPosition(0)
+		}
 
 		recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-				super.onScrolled(recyclerView, dx, dy)
-				if (dy > 20) {
-					fabScrollToTop.visibility = View.VISIBLE
-				} else if (dy < -20 && recyclerView.computeVerticalScrollOffset() == 0) {
-					fabScrollToTop.visibility = View.GONE
+				if (dy > 0) {
+					scrollToTopButton.show()
+				} else {
+					scrollToTopButton.hide()
 				}
 			}
 		})
-
-		fabScrollToTop.setOnClickListener {
-			recyclerView.smoothScrollToPosition(0)
-			fabScrollToTop.visibility = View.GONE
-		}
 
 		return view
 	}
@@ -104,10 +107,19 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 				R.id.changeEmail -> changeEmail()
 				R.id.changePassword -> changePassword()
 				R.id.deleteAccount -> deleteAccount()
+				R.id.banUser -> showBanUserDialog()
 			}
 			true
 		}
 		popupMenu.show()
+
+		// Check if the user is an admin
+		auth.currentUser?.getIdToken(false)?.addOnSuccessListener { result ->
+			val isAdmin = result.claims["admin"] as? Boolean ?: false
+			if (isAdmin) {
+				popupMenu.menu.findItem(R.id.banUser).isVisible = true
+			}
+		}
 	}
 
 	private fun changeUsername() {
@@ -124,6 +136,57 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 
 	private fun deleteAccount() {
 		// Implement delete account functionality
+	}
+
+	private fun showBanUserDialog() {
+		val usersRef = db.collection("users")
+		val usersList = mutableListOf<String>()
+		val usersIdList = mutableListOf<String>()
+
+		usersRef.get().addOnSuccessListener { result ->
+			for (document in result) {
+				val username = document.getString("username") ?: "Unknown"
+				usersList.add(username)
+				usersIdList.add(document.id)
+			}
+
+			val builder = AlertDialog.Builder(requireContext())
+			builder.setTitle("Select a user to ban")
+			builder.setItems(usersList.toTypedArray()) { _, which ->
+				val userIdToBan = usersIdList[which]
+				showBanConfirmationDialog(userIdToBan)
+			}
+			builder.show()
+		}
+	}
+
+	private fun showBanConfirmationDialog(userIdToBan: String) {
+		AlertDialog.Builder(requireContext())
+			.setMessage("Are you sure you want to ban this user?")
+			.setPositiveButton("Ban") { _, _ ->
+				banUser(userIdToBan)
+			}
+			.setNegativeButton("Cancel", null)
+			.show()
+	}
+
+	private fun banUser(userIdToBan: String) {
+		val userRef = db.collection("users").document(userIdToBan)
+		val postsRef = db.collection("posts").whereEqualTo("userId", userIdToBan)
+
+		// Delete all posts by the user
+		postsRef.get().addOnSuccessListener { result ->
+			for (document in result) {
+				document.reference.delete()
+			}
+
+			// Delete the user document
+			userRef.delete().addOnSuccessListener {
+				Toast.makeText(context, "User banned successfully", Toast.LENGTH_SHORT).show()
+			}.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to ban user: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+		}
 	}
 
 	private fun logout() {

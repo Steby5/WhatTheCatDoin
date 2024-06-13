@@ -3,7 +3,8 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:padding="16dp">
+	android:padding="16dp"
+	android:background="@drawable/gradient_background">
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/commentsRecyclerView"
@@ -16,11 +17,16 @@
 		android:id="@+id/commentEditText"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:textColor="@color/black"
+		android:textColorHint="@color/black"
 		android:hint="Write a comment" />
 
 	<Button
 		android:id="@+id/addCommentButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:text="Add Comment" />
+		android:textColor="@color/black"
+		android:text="Add Comment"
+		android:background="@drawable/rounded_rectangle"
+		android:backgroundTint="@color/secondary"/>
 </LinearLayout>

@@ -59,7 +59,7 @@ dependencies {
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit.v113)
 	androidTestImplementation(libs.androidx.espresso.core.v340)
-
+	implementation ("com.google.android.material:material:1.5.0")
 	implementation("com.github.yalantis:ucrop:2.2.9")
 
 }

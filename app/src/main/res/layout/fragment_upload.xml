@@ -17,7 +17,6 @@
 			android:layout_width="match_parent"
 			android:layout_height="200dp"
 			android:layout_marginBottom="16dp"
-			android:background="@drawable/image_placeholder"
 			android:scaleType="fitCenter" />
 
 		<EditText
@@ -25,7 +24,9 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginBottom="16dp"
-			android:hint="Description" />
+			android:hint="Description"
+			android:textColorHint="@color/black"
+			android:textColor="@color/black"/>
 
 		<LinearLayout
 			android:layout_width="match_parent"
@@ -43,7 +44,8 @@
 				android:gravity="center"
 				android:padding="8dp"
 				android:layout_marginEnd="8dp"
-				android:background="@color/primary"
+				android:background="@drawable/rounded_rectangle"
+				android:backgroundTint="@color/primary"
 				android:clickable="true"
 				android:focusable="true">
 
@@ -57,6 +59,8 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="Camera"
+					android:textColor="@color/black"
+					android:textStyle="italic"
 					android:layout_gravity="center"
 					android:textAlignment="center" />
 			</LinearLayout>
@@ -70,7 +74,8 @@
 				android:gravity="center"
 				android:padding="8dp"
 				android:layout_marginStart="8dp"
-				android:background="@color/primary"
+				android:background="@drawable/rounded_rectangle"
+				android:backgroundTint="@color/primary"
 				android:clickable="true"
 				android:focusable="true">
 
@@ -84,6 +89,8 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:text="Gallery"
+					android:textColor="@color/black"
+					android:textStyle="italic"
 					android:layout_gravity="center"
 					android:textAlignment="center" />
 			</LinearLayout>
@@ -96,7 +103,8 @@
 			android:orientation="vertical"
 			android:gravity="center"
 			android:padding="8dp"
-			android:background="@color/primary"
+			android:background="@drawable/rounded_rectangle"
+			android:backgroundTint="@color/primary"
 			android:clickable="true"
 			android:focusable="true">
 
@@ -111,7 +119,9 @@
 				android:id="@+id/uploadText"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Upload"
+				android:text="Post Image"
+				android:textColor="@color/black"
+				android:textStyle="italic"
 				android:layout_gravity="center"
 				android:textAlignment="center" />
 

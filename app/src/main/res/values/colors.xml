@@ -1,14 +1,8 @@
 <resources>
-	<color name="primary">#7F558C</color>
-	<color name="primary_variant">#A47BAF</color>
-	<color name="secondary">#FF6F61</color>
-	<color name="secondary_variant">#FF6F61</color>
-	<color name="on_primary">#FFFFFF</color>
-	<color name="on_secondary">#000000</color>
-	<color name="background_light">#FFFFFF</color>
-	<color name="background_dark">#1E1E1E</color>
-	<color name="text_primary_light">#333333</color>
-	<color name="text_secondary_light">#666666</color>
-	<color name="text_primary_dark">#E0E0E0</color>
-	<color name="text_secondary_dark">#B0B0B0</color>
+	<color name="primary">#CDB4DB</color>
+	<color name="primary_variant">#FFC8DD</color>
+	<color name="secondary">#A2D2FF</color>
+	<color name="secondary_variant">#C1E1C1</color>
+	<color name="white">#FFFFFF</color>
+	<color name="black">#000000</color>
 </resources>

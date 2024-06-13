@@ -25,8 +25,9 @@ class HomeFragment : Fragment() {
 	private lateinit var postList: MutableList<Post>
 	private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 	private lateinit var filterButton: Button
-	private lateinit var fabScrollToTop: FloatingActionButton
+	private lateinit var scrollToTopButton: FloatingActionButton
 	private var showAllPosts: Boolean = true
+	private var isAdmin: Boolean = false
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +40,7 @@ class HomeFragment : Fragment() {
 		recyclerView = view.findViewById(R.id.recyclerView)
 		swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
 		filterButton = view.findViewById(R.id.filterButton)
-		fabScrollToTop = view.findViewById(R.id.fabScrollToTop)
+		scrollToTopButton = view.findViewById(R.id.scrollToTopButton)
 		postList = mutableListOf()
 		adapter = RecyclerViewAdapter(postList)
 		recyclerView.layoutManager = LinearLayoutManager(context)
@@ -53,29 +54,35 @@ class HomeFragment : Fragment() {
 
 		filterButton.setOnClickListener {
 			showAllPosts = !showAllPosts
-			filterButton.text = if (showAllPosts) "All Cats" else "Followed Cats"
+			filterButton.text = if (showAllPosts) "Explore" else "Following"
 			loadPosts()
+		}
+
+		scrollToTopButton.setOnClickListener {
+			recyclerView.smoothScrollToPosition(0)
 		}
 
 		recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-				super.onScrolled(recyclerView, dx, dy)
-				if (dy > 20) {
-					fabScrollToTop.visibility = View.VISIBLE
-				} else if (dy < -20 && recyclerView.computeVerticalScrollOffset() == 0) {
-					fabScrollToTop.visibility = View.GONE
+				if (dy > 0) {
+					scrollToTopButton.show()
+				} else {
+					scrollToTopButton.hide()
 				}
 			}
 		})
 
-		fabScrollToTop.setOnClickListener {
-			recyclerView.smoothScrollToPosition(0)
-			fabScrollToTop.visibility = View.GONE
-		}
-
 		loadPosts()
 
 		return view
+	}
+
+	private fun checkIfAdmin(onComplete: (Boolean) -> Unit) {
+		val userId = auth.currentUser?.uid ?: return
+		db.collection("admins").document(userId).get().addOnSuccessListener { document ->
+			isAdmin = document.exists()
+			onComplete(isAdmin)
+		}
 	}
 
 	private fun loadPosts(onComplete: (() -> Unit)? = null) {

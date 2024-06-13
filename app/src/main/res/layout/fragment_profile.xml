@@ -12,6 +12,16 @@
 		android:orientation="horizontal"
 		android:gravity="center_vertical">
 
+		<com.google.android.material.imageview.ShapeableImageView
+			android:id="@+id/profileImage"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:layout_gravity="center_vertical"
+			android:contentDescription="TODO"
+			android:scaleType="centerCrop"
+			android:src="@drawable/ic_launcher_foreground"
+			app:shapeAppearanceOverlay="@style/CircleImage" />
+
 		<TextView
 			android:id="@+id/usernameTextView"
 			android:layout_width="wrap_content"
@@ -27,7 +37,9 @@
 			android:id="@+id/logoutButton"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Logout"/>
+			android:background="@drawable/rounded_rectangle"
+			android:backgroundTint="@color/primary"
+			android:text="Logout" />
 	</LinearLayout>
 
 	<androidx.recyclerview.widget.RecyclerView
@@ -38,7 +50,7 @@
 		android:layout_marginTop="16dp"/>
 
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
-		android:id="@+id/fabScrollToTop"
+		android:id="@+id/scrollToTopButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentEnd="true"
@@ -46,6 +58,6 @@
 		android:layout_margin="16dp"
 		android:visibility="gone"
 		android:src="@drawable/ic_arrow_upward"
-		app:backgroundTint="@color/primary_variant"
+		app:backgroundTint="#CDB4DB"
 		app:tint="@android:color/white" />
 </RelativeLayout>

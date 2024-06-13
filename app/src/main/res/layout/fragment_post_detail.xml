@@ -3,13 +3,16 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:background="@drawable/rounded_rectangle"
+	android:backgroundTint="@color/secondary_variant">
 
 	<androidx.appcompat.widget.Toolbar
 		android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
-		android:background="@color/primary"
+		android:background="@drawable/rounded_rectangle"
+		android:backgroundTint="@color/secondary"
 		app:navigationIcon="@drawable/ic_back"
 		app:title="Post Details"
 		app:titleTextColor="@android:color/white" />
@@ -42,6 +45,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Likes: "
+					android:textColor="@color/black"
 					android:textSize="16sp" />
 				<TextView
 					android:id="@+id/likes_count"
@@ -49,6 +53,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Likes Count"
+					android:textColor="@color/black"
 					android:textSize="16sp" />
 			</LinearLayout>
 
@@ -61,6 +66,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Description: "
+					android:textColor="@color/black"
 					android:textSize="16sp" />
 				<TextView
 					android:id="@+id/description"
@@ -68,6 +74,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Description"
+					android:textColor="@color/black"
 					android:textSize="14sp" />
 			</LinearLayout>
 
@@ -80,6 +87,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Uploaded: "
+					android:textColor="@color/black"
 					android:textSize="16sp" />
 				<TextView
 					android:id="@+id/timestamp"
@@ -87,6 +95,7 @@
 					android:layout_height="wrap_content"
 					android:layout_marginTop="8dp"
 					android:text="Timestamp"
+					android:textColor="@color/black"
 					android:textSize="14sp" />
 			</LinearLayout>
 

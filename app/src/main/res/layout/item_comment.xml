@@ -10,13 +10,15 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="User Name"
+		android:textColor="@color/black"
 		android:textStyle="bold" />
 
 	<TextView
 		android:id="@+id/commentText"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="Comment text" />
+		android:text="Comment text"
+		android:textColor="@color/black"/>
 
 	<TextView
 		android:id="@+id/commentTimestamp"
