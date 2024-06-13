@@ -28,9 +28,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="Logout"/>
-
 	</LinearLayout>
-
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/archiveRecyclerView"
@@ -38,4 +36,16 @@
 		android:layout_height="match_parent"
 		android:layout_below="@id/headerLinearLayout"
 		android:layout_marginTop="16dp"/>
+
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
+		android:id="@+id/fabScrollToTop"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentEnd="true"
+		android:layout_alignParentBottom="true"
+		android:layout_margin="16dp"
+		android:visibility="gone"
+		android:src="@drawable/ic_arrow_upward"
+		app:backgroundTint="@color/primary_variant"
+		app:tint="@android:color/white" />
 </RelativeLayout>

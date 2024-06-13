@@ -1,6 +1,7 @@
 package si.uni_lj.fe.whatthecatdoin
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +28,9 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 		val likeButton: ImageButton = itemView.findViewById(R.id.likeButton)
 		val likeCount: TextView = itemView.findViewById(R.id.likeCount)
 		val commentButton: ImageButton = itemView.findViewById(R.id.commentButton)
+		val commentCount: TextView = itemView.findViewById(R.id.commentCount)
 		val followButton: ImageButton = itemView.findViewById(R.id.followButton)
+		val followCount: TextView = itemView.findViewById(R.id.followCount)
 	}
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -43,6 +46,19 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 		if (post.imageUrl.isNotEmpty()) {
 			Glide.with(holder.itemView.context).load(post.imageUrl).into(holder.postImage)
+		}
+
+		// Get and set comment count
+		db.collection("posts").document(post.id).collection("comments")
+			.get()
+			.addOnSuccessListener { result ->
+				val commentCount = result.size()
+				holder.commentCount.text = commentCount.toString()
+			}
+
+		// Get and set follow count
+		getFollowCount(post.userId) { followCount ->
+			holder.followCount.text = followCount.toString()
 		}
 
 		if (currentUserId != null) {
@@ -101,7 +117,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 				if (document.exists()) {
 					// Unlike the post
 					likeRef.delete()
-					post.likes -= 1
+					post.likes = (post.likes - 1).coerceAtLeast(0)
 					holder.likeButton.setImageResource(R.drawable.heart)
 					Toast.makeText(holder.itemView.context, "Unliked", Toast.LENGTH_SHORT).show()
 				} else {
@@ -124,26 +140,44 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 				// Successfully updated likes
 			}
 			.addOnFailureListener { e ->
-				// Handle failure
+				Log.e("RecyclerViewAdapter", "Failed to update likes: ${e.message}")
 			}
 	}
 
 	private fun toggleFollow(post: Post, holder: ViewHolder) {
 		if (currentUserId != null) {
-			val followRef = db.collection("users").document(currentUserId).collection("following").document(post.userId)
-			followRef.get().addOnSuccessListener { document ->
+			val followingRef = db.collection("users").document(currentUserId).collection("following").document(post.userId)
+			val followerRef = db.collection("users").document(post.userId).collection("followers").document(currentUserId)
+
+			followingRef.get().addOnSuccessListener { document ->
 				if (document.exists()) {
 					// Unfollow the user
-					followRef.delete()
+					followingRef.delete()
+					followerRef.delete()
 					holder.followButton.setImageResource(R.drawable.ic_follow)
 					Toast.makeText(holder.itemView.context, "Unfollowed", Toast.LENGTH_SHORT).show()
 				} else {
 					// Follow the user
-					followRef.set(hashMapOf("following" to true))
+					followingRef.set(hashMapOf("following" to true))
+					followerRef.set(hashMapOf("follower" to true))
 					holder.followButton.setImageResource(R.drawable.ic_following)
 					Toast.makeText(holder.itemView.context, "Followed", Toast.LENGTH_SHORT).show()
 				}
+				getFollowCount(post.userId) { followCount ->
+					holder.followCount.text = followCount.toString()
+				}
 			}
 		}
+	}
+
+	private fun getFollowCount(userId: String, callback: (Int) -> Unit) {
+		db.collection("users").document(userId).collection("followers")
+			.get()
+			.addOnSuccessListener { result ->
+				callback(result.size())
+			}
+			.addOnFailureListener { e ->
+				Log.e("RecyclerViewAdapter", "Failed to get follower count: ${e.message}")
+			}
 	}
 }

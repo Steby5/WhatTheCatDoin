@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import si.uni_lj.fe.whatthecatdoin.Post
@@ -24,6 +25,7 @@ class HomeFragment : Fragment() {
 	private lateinit var postList: MutableList<Post>
 	private lateinit var swipeRefreshLayout: SwipeRefreshLayout
 	private lateinit var filterButton: Button
+	private lateinit var fabScrollToTop: FloatingActionButton
 	private var showAllPosts: Boolean = true
 
 	override fun onCreateView(
@@ -37,6 +39,7 @@ class HomeFragment : Fragment() {
 		recyclerView = view.findViewById(R.id.recyclerView)
 		swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
 		filterButton = view.findViewById(R.id.filterButton)
+		fabScrollToTop = view.findViewById(R.id.fabScrollToTop)
 		postList = mutableListOf()
 		adapter = RecyclerViewAdapter(postList)
 		recyclerView.layoutManager = LinearLayoutManager(context)
@@ -52,6 +55,22 @@ class HomeFragment : Fragment() {
 			showAllPosts = !showAllPosts
 			filterButton.text = if (showAllPosts) "All Cats" else "Followed Cats"
 			loadPosts()
+		}
+
+		recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+				super.onScrolled(recyclerView, dx, dy)
+				if (dy > 20) {
+					fabScrollToTop.visibility = View.VISIBLE
+				} else if (dy < -20 && recyclerView.computeVerticalScrollOffset() == 0) {
+					fabScrollToTop.visibility = View.GONE
+				}
+			}
+		})
+
+		fabScrollToTop.setOnClickListener {
+			recyclerView.smoothScrollToPosition(0)
+			fabScrollToTop.visibility = View.GONE
 		}
 
 		loadPosts()

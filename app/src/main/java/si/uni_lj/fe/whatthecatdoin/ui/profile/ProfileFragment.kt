@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import si.uni_lj.fe.whatthecatdoin.Post
@@ -25,6 +26,7 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 	private lateinit var auth: FirebaseAuth
 	private lateinit var usernameTextView: TextView
 	private lateinit var logoutButton: TextView
+	private lateinit var fabScrollToTop: FloatingActionButton
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -38,15 +40,32 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		usernameTextView = view.findViewById(R.id.usernameTextView)
 		logoutButton = view.findViewById(R.id.logoutButton)
 		recyclerView = view.findViewById(R.id.archiveRecyclerView)
+		fabScrollToTop = view.findViewById(R.id.fabScrollToTop)
 		recyclerView.layoutManager = GridLayoutManager(context, 2)
 		postList = mutableListOf()
 		adapter = ArchiveAdapter { post -> showPostDetail(post) }
 		recyclerView.adapter = adapter
 
 		loadPosts()
-
+		usernameTextView.text = auth.currentUser?.displayName
 		usernameTextView.setOnClickListener { showPopupMenu() }
 		logoutButton.setOnClickListener { logout() }
+
+		recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+				super.onScrolled(recyclerView, dx, dy)
+				if (dy > 20) {
+					fabScrollToTop.visibility = View.VISIBLE
+				} else if (dy < -20 && recyclerView.computeVerticalScrollOffset() == 0) {
+					fabScrollToTop.visibility = View.GONE
+				}
+			}
+		})
+
+		fabScrollToTop.setOnClickListener {
+			recyclerView.smoothScrollToPosition(0)
+			fabScrollToTop.visibility = View.GONE
+		}
 
 		return view
 	}
