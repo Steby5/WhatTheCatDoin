@@ -112,7 +112,7 @@
 				android:id="@+id/uploadIcon"
 				android:layout_width="24dp"
 				android:layout_height="24dp"
-				android:src="@drawable/ic_upload"
+				android:src="@drawable/ic_post"
 				android:layout_gravity="center" />
 
 			<TextView

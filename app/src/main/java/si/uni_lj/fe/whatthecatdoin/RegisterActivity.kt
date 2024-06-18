@@ -1,3 +1,4 @@
+// RegisterActivity.kt
 package si.uni_lj.fe.whatthecatdoin
 
 import android.content.Intent
@@ -31,12 +32,13 @@ class RegisterActivity : AppCompatActivity() {
 		val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
 		val repeatPasswordEditText = findViewById<EditText>(R.id.repeatPasswordEditText)
 		val createAccountButton = findViewById<Button>(R.id.createAccountButton)
+		val loginButton = findViewById<Button>(R.id.loginButton)
 
 		createAccountButton.setOnClickListener {
-			val username = usernameEditText.text.toString()
-			val email = emailEditText.text.toString()
-			val password = passwordEditText.text.toString()
-			val repeatPassword = repeatPasswordEditText.text.toString()
+			val username = usernameEditText.text.toString().trim()
+			val email = emailEditText.text.toString().trim()
+			val password = passwordEditText.text.toString().trim()
+			val repeatPassword = repeatPasswordEditText.text.toString().trim()
 
 			if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && repeatPassword.isNotEmpty()) {
 				if (password == repeatPassword) {
@@ -47,6 +49,11 @@ class RegisterActivity : AppCompatActivity() {
 			} else {
 				Toast.makeText(this, "Please fill out all fields.", Toast.LENGTH_SHORT).show()
 			}
+		}
+
+		loginButton.setOnClickListener {
+			startActivity(Intent(this, LoginActivity::class.java))
+			finish()
 		}
 	}
 
@@ -62,9 +69,13 @@ class RegisterActivity : AppCompatActivity() {
 						it.updateProfile(profileUpdates)
 							.addOnCompleteListener { task2 ->
 								if (task2.isSuccessful) {
-									saveUserData(it, username, email)
+									sendEmailVerification(it)
 								} else {
-									Toast.makeText(this, "Failed to update profile.", Toast.LENGTH_SHORT).show()
+									Toast.makeText(
+										this,
+										"Failed to update profile.",
+										Toast.LENGTH_SHORT
+									).show()
 								}
 							}
 					}
@@ -80,21 +91,40 @@ class RegisterActivity : AppCompatActivity() {
 			}
 	}
 
-	private fun saveUserData(user: FirebaseUser, username: String, email: String) {
+	private fun sendEmailVerification(user: FirebaseUser) {
+		user.sendEmailVerification()
+			.addOnCompleteListener { task ->
+				if (task.isSuccessful) {
+					Toast.makeText(this, "Verification email sent.", Toast.LENGTH_SHORT).show()
+					saveUserData(user)
+				} else {
+					Toast.makeText(
+						this,
+						"Failed to send verification email.",
+						Toast.LENGTH_SHORT
+					).show()
+				}
+			}
+	}
+
+	private fun saveUserData(user: FirebaseUser) {
 		val userId = user.uid
 		val userData = hashMapOf(
-			"username" to username,
-			"email" to email
+			"username" to user.displayName,
+			"email" to user.email
 		)
 
 		db.collection("users").document(userId).set(userData)
 			.addOnSuccessListener {
-				Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
-				startActivity(Intent(this, MainActivity::class.java))
+				startActivity(Intent(this, EmailVerificationActivity::class.java))
 				finish()
 			}
 			.addOnFailureListener { e ->
-				Toast.makeText(this, "Failed to save user data: ${e.message}", Toast.LENGTH_SHORT).show()
+				Toast.makeText(
+					this,
+					"Failed to save user data: ${e.message}",
+					Toast.LENGTH_SHORT
+				).show()
 			}
 	}
 }

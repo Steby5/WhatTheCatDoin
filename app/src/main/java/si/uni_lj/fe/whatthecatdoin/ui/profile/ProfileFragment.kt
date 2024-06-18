@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -19,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.yalantis.ucrop.UCrop
@@ -104,6 +107,7 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 						}
 						postList.add(post)
 					}
+					postList.sortByDescending { it.timestamp }
 					adapter.submitList(postList)
 				}
 		}
@@ -228,15 +232,133 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 	}
 
 	private fun changeUsername() {
-		// Implement change username functionality
+		val builder = AlertDialog.Builder(context)
+		val inflater = layoutInflater
+		val dialogLayout = inflater.inflate(R.layout.dialog_change_username, null)
+		val editText = dialogLayout.findViewById<EditText>(R.id.editTextUsername)
+		builder.setView(dialogLayout)
+		builder.setTitle("Change Username")
+		builder.setPositiveButton("Change") { _, _ ->
+			val newUsername = editText.text.toString().trim()
+			if (newUsername.isNotEmpty()) {
+				checkUsernameAvailability(newUsername)
+			} else {
+				Toast.makeText(context, "Username cannot be empty", Toast.LENGTH_SHORT).show()
+			}
+		}
+		builder.setNegativeButton("Cancel", null)
+		builder.show()
 	}
+
+	private fun checkUsernameAvailability(newUsername: String) {
+		val currentUserId = auth.currentUser?.uid ?: return
+		db.collection("users").whereEqualTo("username", newUsername).get()
+			.addOnSuccessListener { documents ->
+				if (documents.isEmpty) {
+					checkUsernameChangeEligibility(currentUserId, newUsername)
+				} else {
+					Toast.makeText(context, "Username already exists", Toast.LENGTH_SHORT).show()
+				}
+			}
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to check username availability: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+	}
+
+	private fun checkUsernameChangeEligibility(currentUserId: String, newUsername: String) {
+		db.collection("users").document(currentUserId).get()
+			.addOnSuccessListener { document ->
+				val lastChanged = document.getLong("lastUsernameChange")
+				val currentTime = System.currentTimeMillis()
+				if (lastChanged == null || currentTime - lastChanged > 30L * 24 * 60 * 60 * 1000) { // 30 days
+					showUsernameChangeConfirmationDialog(currentUserId, newUsername, currentTime)
+				} else {
+					Toast.makeText(context, "You can only change your username once every 30 days", Toast.LENGTH_SHORT).show()
+				}
+			}
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to check username change eligibility: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+	}
+
+	private fun showUsernameChangeConfirmationDialog(currentUserId: String, newUsername: String, currentTime: Long) {
+		AlertDialog.Builder(context)
+			.setMessage("Are you sure you want to change your username to $newUsername?\nYou can only change your username once every 30 days.")
+			.setPositiveButton("Yes") { _, _ -> changeUsernameInDatabase(currentUserId, newUsername, currentTime) }
+			.setNegativeButton("No", null)
+			.show()
+	}
+
+	private fun changeUsernameInDatabase(currentUserId: String, newUsername: String, currentTime: Long) {
+		db.collection("users").document(currentUserId).update(
+			"username", newUsername,
+			"lastUsernameChange", currentTime
+		)
+			.addOnSuccessListener {
+				updateUsernameInPosts(currentUserId, newUsername)
+				updateProfileUsername(newUsername)
+			}
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to change username: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+	}
+
+	private fun updateUsernameInPosts(currentUserId: String, newUsername: String) {
+		db.collection("posts").whereEqualTo("userId", currentUserId).get()
+			.addOnSuccessListener { result ->
+				for (document in result) {
+					db.collection("posts").document(document.id)
+						.update("profileName", newUsername)
+				}
+				Toast.makeText(context, "Username changed successfully", Toast.LENGTH_SHORT).show()
+			}
+			.addOnFailureListener { e ->
+				Toast.makeText(context, "Failed to update username in posts: ${e.message}", Toast.LENGTH_SHORT).show()
+			}
+	}
+
+	private fun updateProfileUsername(newUsername: String) {
+		auth.currentUser?.let { user ->
+			val profileUpdates = UserProfileChangeRequest.Builder()
+				.setDisplayName(newUsername)
+				.build()
+			user.updateProfile(profileUpdates)
+				.addOnCompleteListener { task ->
+					if (task.isSuccessful) {
+						usernameTextView.text = newUsername
+					} else {
+						Toast.makeText(context, "Failed to update username in profile", Toast.LENGTH_SHORT).show()
+					}
+				}
+		}
+	}
+
 
 	private fun changeEmail() {
 		// Implement change email functionality
 	}
 
 	private fun changePassword() {
-		// Implement change password functionality
+		AlertDialog.Builder(context)
+			.setMessage("Are you sure you want to reset your password? Link to reset password will be sent to your email (" + auth.currentUser?.email + ").")
+			.setPositiveButton("Yes") { _, _ -> sendPasswordResetEmail() }
+			.setNegativeButton("No", null)
+			.show()
+	}
+
+	private fun sendPasswordResetEmail() {
+		val user = auth.currentUser
+		user?.let {
+			auth.sendPasswordResetEmail(it.email!!)
+				.addOnCompleteListener { task ->
+					if (task.isSuccessful) {
+						Toast.makeText(context, "Password reset email sent.", Toast.LENGTH_SHORT).show()
+						logout() // Log out the user after sending the reset email
+					} else {
+						Toast.makeText(context, "Failed to send password reset email.", Toast.LENGTH_SHORT).show()
+					}
+				}
+		}
 	}
 
 	private fun showDeleteAccountConfirmationDialog() {
@@ -257,16 +379,6 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 							db.collection("posts").document(document.id).delete()
 						}
 					}
-				auth.currentUser?.delete()
-					?.addOnCompleteListener { task ->
-						if (task.isSuccessful) {
-							Toast.makeText(context, "Account deleted", Toast.LENGTH_SHORT).show()
-							startActivity(Intent(context, RegisterActivity::class.java))
-							activity?.finish()
-						} else {
-							Toast.makeText(context, "Failed to delete account", Toast.LENGTH_SHORT).show()
-						}
-					}
 			}
 			.addOnFailureListener { e ->
 				Toast.makeText(context, "Failed to delete user: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -285,16 +397,16 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 					.setTitle("Select a user to ban")
 					.setItems(userNames) { _, which ->
 						val selectedUserId = userIds[which]
-						showBanConfirmationDialog(selectedUserId)
+						showBanConfirmationDialog(selectedUserId, userNames[which])
 					}
 					.setNegativeButton("Cancel", null)
 					.show()
 			}
 	}
 
-	private fun showBanConfirmationDialog(userId: String) {
+	private fun showBanConfirmationDialog(userId: String, username: String = "") {
 		AlertDialog.Builder(context)
-			.setMessage("Are you sure you want to ban this user?")
+			.setMessage("Are you sure you want to ban this user (" + username + ")?")
 			.setPositiveButton("Ban") { _, _ -> deleteUser(userId) }
 			.setNegativeButton("Cancel", null)
 			.show()
