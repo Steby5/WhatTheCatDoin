@@ -15,8 +15,8 @@ android {
 		applicationId = "si.uni_lj.fe.whatthecatdoin"
 		minSdk = 26
 		targetSdk = 33
-		versionCode = 2
-		versionName = "2.4"
+		versionCode = 25
+		versionName = "2.5"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
@@ -61,5 +61,6 @@ dependencies {
 	androidTestImplementation(libs.androidx.espresso.core.v340)
 	implementation ("com.google.android.material:material:1.5.0")
 	implementation("com.github.yalantis:ucrop:2.2.9")
+	implementation ("com.google.android.material:material:1.3.0")
 
 }

@@ -1,5 +1,6 @@
 package si.uni_lj.fe.whatthecatdoin.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +55,7 @@ class HomeFragment : Fragment() {
 
 		filterButton.setOnClickListener {
 			showAllPosts = !showAllPosts
-			filterButton.text = if (showAllPosts) "Explore" else "Following"
+			filterButton.text = if (showAllPosts) "All Cats" else "Followed Cats"
 			loadPosts()
 		}
 

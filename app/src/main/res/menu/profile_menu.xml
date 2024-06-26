@@ -1,5 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item
+		android:id="@+id/changeProfileImage"
+		android:title="Change Profile Image" />
+	<item
 		android:id="@+id/changeUsername"
 		android:title="Change Username" />
 	<item
@@ -12,7 +15,10 @@
 		android:id="@+id/deleteAccount"
 		android:title="Delete Account" />
 	<item
-		android:id="@+id/banUser"
-		android:title="Ban User"
+		android:id="@+id/logout"
+		android:title="Logout" />
+	<item
+		android:id="@+id/manageUsers"
+		android:title="Manage Users"
 		android:visible="false" />
 </menu>

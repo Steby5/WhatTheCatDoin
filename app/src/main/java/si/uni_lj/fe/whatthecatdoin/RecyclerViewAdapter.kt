@@ -17,23 +17,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import si.uni_lj.fe.whatthecatdoin.ui.comments.CommentsActivity
 
-class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+class RecyclerViewAdapter(private var postList: List<Post>, private var isAdmin: Boolean = false) : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
 
 	private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 	private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+	private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 	private val currentUserId = auth.currentUser?.uid
-	private var isAdmin: Boolean = false
-
-	init {
-		auth.currentUser?.getIdToken(false)?.addOnSuccessListener { result ->
-			isAdmin = result.claims["admin"] as? Boolean ?: false
-			notifyDataSetChanged()
-		}
-	}
 
 	inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 		val profileName: TextView = itemView.findViewById(R.id.profileName)
-		val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
 		val postImage: ImageView = itemView.findViewById(R.id.postImage)
 		val description: TextView = itemView.findViewById(R.id.description)
 		val likeButton: ImageButton = itemView.findViewById(R.id.likeButton)
@@ -54,23 +46,11 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 		val post = postList[position]
 		holder.profileName.text = post.profileName
 		holder.likeCount.text = post.likes.toString()
-		holder.commentCount.text = "0" // Default value, will be updated later
-		holder.followCount.text = "0" // Default value, will be updated later
 		holder.description.text = post.description
 
 		if (post.imageUrl.isNotEmpty()) {
 			Glide.with(holder.itemView.context).load(post.imageUrl).into(holder.postImage)
 		}
-
-		db.collection("users").document(post.userId).get()
-			.addOnSuccessListener { document ->
-				if (document.exists()) {
-					val profileImageUrl = document.getString("profileImageUrl")
-					profileImageUrl?.let {
-						Glide.with(holder.itemView.context).load(it).into(holder.profileImage)
-					}
-				}
-			}
 
 		if (currentUserId != null) {
 			val postRef = db.collection("posts").document(post.id)
@@ -101,7 +81,7 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 				.get()
 				.addOnSuccessListener { document ->
 					if (document.exists()) {
-						holder.followButton.setImageResource(R.drawable.ic_following)
+						holder.followButton.setImageResource(R.drawable.ic_unfollow)
 					} else {
 						holder.followButton.setImageResource(R.drawable.ic_follow)
 					}
@@ -111,27 +91,28 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 				toggleFollow(post, holder)
 			}
 
-			// Fetch comment count
-			postRef.collection("comments").get()
-				.addOnSuccessListener { documents ->
-					holder.commentCount.text = documents.size().toString()
-				}
-
-			// Fetch follow count
-			db.collection("users").document(post.userId).collection("followers").get()
-				.addOnSuccessListener { documents ->
-					holder.followCount.text = documents.size().toString()
-				}
-
-			if (isAdmin || post.userId == currentUserId) {
+			// Show delete button for admin users
+			if (isAdmin) {
 				holder.deleteButton.visibility = View.VISIBLE
 				holder.deleteButton.setOnClickListener {
 					showDeleteConfirmationDialog(holder.itemView.context, post, holder)
 				}
-			} else {
-				holder.deleteButton.visibility = View.GONE
 			}
 		}
+
+		// Fetch and display comment count
+		db.collection("posts").document(post.id).collection("comments")
+			.get()
+			.addOnSuccessListener { result ->
+				holder.commentCount.text = result.size().toString()
+			}
+
+		// Fetch and display follower count
+		db.collection("users").document(post.userId).collection("followers")
+			.get()
+			.addOnSuccessListener { result ->
+				holder.followCount.text = result.size().toString()
+			}
 	}
 
 	override fun getItemCount(): Int = postList.size
@@ -178,20 +159,34 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 
 	private fun toggleFollow(post: Post, holder: ViewHolder) {
 		if (currentUserId != null) {
-			val followRef = db.collection("users").document(currentUserId).collection("following").document(post.userId)
-			followRef.get().addOnSuccessListener { document ->
-				if (document.exists()) {
+			val followingRef = db.collection("users").document(currentUserId).collection("following").document(post.userId)
+			val followerRef = db.collection("users").document(post.userId).collection("followers").document(currentUserId)
+
+			db.runTransaction { transaction ->
+				val followingDoc = transaction.get(followingRef)
+				if (followingDoc.exists()) {
 					// Unfollow the user
-					followRef.delete()
-					holder.followButton.setImageResource(R.drawable.ic_follow)
-					Toast.makeText(holder.itemView.context, "Unfollowed", Toast.LENGTH_SHORT).show()
+					transaction.delete(followingRef)
+					transaction.delete(followerRef)
+					holder.itemView.post {
+						holder.followButton.setImageResource(R.drawable.ic_follow)
+						Toast.makeText(holder.itemView.context, "Unfollowed", Toast.LENGTH_SHORT).show()
+					}
 				} else {
 					// Follow the user
-					followRef.set(hashMapOf("following" to true))
-					holder.followButton.setImageResource(R.drawable.ic_following)
-					Toast.makeText(holder.itemView.context, "Followed", Toast.LENGTH_SHORT).show()
+					transaction.set(followingRef, hashMapOf("following" to true))
+					transaction.set(followerRef, hashMapOf("follower" to true))
+					holder.itemView.post {
+						holder.followButton.setImageResource(R.drawable.ic_unfollow)
+						Toast.makeText(holder.itemView.context, "Followed", Toast.LENGTH_SHORT).show()
+					}
 				}
+			}.addOnSuccessListener {
 				updateFollowCount(post.userId, holder)
+			}.addOnFailureListener { e ->
+				holder.itemView.post {
+					Toast.makeText(holder.itemView.context, "Failed to update follow status: ${e.message}", Toast.LENGTH_SHORT).show()
+				}
 			}
 		}
 	}
@@ -199,12 +194,17 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 	private fun updateFollowCount(userId: String, holder: ViewHolder) {
 		db.collection("users").document(userId).collection("followers").get()
 			.addOnSuccessListener { documents ->
-				holder.followCount.text = documents.size().toString()
+				holder.itemView.post {
+					holder.followCount.text = documents.size().toString()
+				}
 			}
 			.addOnFailureListener { e ->
-				holder.followCount.text = "0"
+				holder.itemView.post {
+					holder.followCount.text = "0"
+				}
 			}
 	}
+
 
 	private fun showDeleteConfirmationDialog(context: Context, post: Post, holder: ViewHolder) {
 		AlertDialog.Builder(context)
@@ -215,25 +215,24 @@ class RecyclerViewAdapter(private var postList: List<Post>) : RecyclerView.Adapt
 	}
 
 	private fun deletePost(post: Post, holder: ViewHolder) {
-		val postRef = db.collection("posts").document(post.id)
-		val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(post.imageUrl)
-
-		// Delete image from Firebase Storage
+		// Delete the image from Firebase Storage
+		val imageRef = storage.getReferenceFromUrl(post.imageUrl)
 		imageRef.delete()
 			.addOnSuccessListener {
-				// Delete post document from Firestore
-				postRef.delete()
+				// Delete the post document from Firestore
+				db.collection("posts").document(post.id)
+					.delete()
 					.addOnSuccessListener {
 						Toast.makeText(holder.itemView.context, "Post deleted", Toast.LENGTH_SHORT).show()
-						postList = postList.filter { it.id != post.id }
+						(postList as MutableList).remove(post)
 						notifyDataSetChanged()
 					}
 					.addOnFailureListener { e ->
-						Toast.makeText(holder.itemView.context, "Failed to delete post: ${e.message}", Toast.LENGTH_SHORT).show()
+						Toast.makeText(holder.itemView.context, "Failed to delete post: ${e.message}", Toast.LENGTH_LONG).show()
 					}
 			}
 			.addOnFailureListener { e ->
-				Toast.makeText(holder.itemView.context, "Failed to delete image: ${e.message}", Toast.LENGTH_SHORT).show()
+				Toast.makeText(holder.itemView.context, "Failed to delete image: ${e.message}", Toast.LENGTH_LONG).show()
 			}
 	}
 }

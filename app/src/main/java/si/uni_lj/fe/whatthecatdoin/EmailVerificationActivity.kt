@@ -1,4 +1,3 @@
-// EmailVerificationActivity.kt
 package si.uni_lj.fe.whatthecatdoin
 
 import android.content.Intent

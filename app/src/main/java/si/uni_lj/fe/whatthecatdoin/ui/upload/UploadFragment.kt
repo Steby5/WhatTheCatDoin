@@ -155,17 +155,17 @@ class UploadFragment : Fragment() {
 							startActivity(intent)
 							requireActivity().finish()
 						}
-						.addOnFailureListener {
+						.addOnFailureListener { e ->
 							progressBar.visibility = View.GONE
 							uploadButton.isEnabled = true
-							Toast.makeText(context, "Failed to upload post", Toast.LENGTH_SHORT).show()
+							Toast.makeText(context, "Failed to upload post ${e.message}", Toast.LENGTH_SHORT).show()
 						}
 				}
 			}
-			.addOnFailureListener {
+			.addOnFailureListener { e ->
 				progressBar.visibility = View.GONE
 				uploadButton.isEnabled = true
-				Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+				Toast.makeText(context, "Failed to upload image ${e.message}", Toast.LENGTH_SHORT).show()
 			}
 	}
 
