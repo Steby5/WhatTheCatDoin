@@ -24,7 +24,15 @@ class RecyclerViewAdapter(private var postList: List<Post>, private var isAdmin:
 	private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 	private val currentUserId = auth.currentUser?.uid
 
+	init {
+		auth.currentUser?.getIdToken(false)?.addOnSuccessListener { result ->
+			isAdmin = result.claims["admin"] as? Boolean ?: false
+			notifyDataSetChanged()
+		}
+	}
+
 	inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+		val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
 		val profileName: TextView = itemView.findViewById(R.id.profileName)
 		val postImage: ImageView = itemView.findViewById(R.id.postImage)
 		val description: TextView = itemView.findViewById(R.id.description)
@@ -50,6 +58,13 @@ class RecyclerViewAdapter(private var postList: List<Post>, private var isAdmin:
 
 		if (post.imageUrl.isNotEmpty()) {
 			Glide.with(holder.itemView.context).load(post.imageUrl).into(holder.postImage)
+		}
+
+ 		// Load profile image
+		if (post.profileImageUrl.isNotEmpty()) {
+			Glide.with(holder.itemView.context).load(post.profileImageUrl).into(holder.profileImage)
+		} else {
+			holder.profileImage.setImageResource(R.drawable.ic_profile) // Default image
 		}
 
 		if (currentUserId != null) {
@@ -97,6 +112,8 @@ class RecyclerViewAdapter(private var postList: List<Post>, private var isAdmin:
 				holder.deleteButton.setOnClickListener {
 					showDeleteConfirmationDialog(holder.itemView.context, post, holder)
 				}
+			} else {
+				holder.deleteButton.visibility = View.GONE
 			}
 		}
 
@@ -204,7 +221,6 @@ class RecyclerViewAdapter(private var postList: List<Post>, private var isAdmin:
 				}
 			}
 	}
-
 
 	private fun showDeleteConfirmationDialog(context: Context, post: Post, holder: ViewHolder) {
 		AlertDialog.Builder(context)

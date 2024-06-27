@@ -6,6 +6,7 @@ import android.os.Parcelable
 data class Post(
 	var id: String = "",
 	val userId: String = "",
+	val profileImageUrl: String = "",
 	val profileName: String = "",
 	val imageUrl: String = "",
 	val description: String = "",
@@ -18,6 +19,7 @@ data class Post(
 		parcel.readString() ?: "",
 		parcel.readString() ?: "",
 		parcel.readString() ?: "",
+		parcel.readString() ?: "",
 		parcel.readInt(),
 		parcel.readLong()
 	)
@@ -25,6 +27,7 @@ data class Post(
 	override fun writeToParcel(parcel: Parcel, flags: Int) {
 		parcel.writeString(id)
 		parcel.writeString(userId)
+		parcel.writeString(profileImageUrl)
 		parcel.writeString(profileName)
 		parcel.writeString(imageUrl)
 		parcel.writeString(description)

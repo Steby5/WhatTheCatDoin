@@ -18,7 +18,7 @@ class CommentsActivity : AppCompatActivity() {
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var adapter: CommentsAdapter
 	private lateinit var commentList: MutableList<Comment>
-	private lateinit var postId: String
+	lateinit var postId: String
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -29,7 +29,7 @@ class CommentsActivity : AppCompatActivity() {
 		recyclerView = findViewById(R.id.commentsRecyclerView)
 		recyclerView.layoutManager = LinearLayoutManager(this)
 		commentList = mutableListOf()
-		adapter = CommentsAdapter(commentList)
+		adapter = CommentsAdapter(commentList, auth.currentUser?.uid ?: "")
 		recyclerView.adapter = adapter
 
 		postId = intent.getStringExtra("postId") ?: return

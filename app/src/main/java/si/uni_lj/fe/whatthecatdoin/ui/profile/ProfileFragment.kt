@@ -155,8 +155,10 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		if (userId != null) {
 			db.collection("users").document(userId).collection("followers").get()
 				.addOnSuccessListener { result ->
-					val followerNames = result.documents.map { it.id to (it.getString("username") ?: "Unknown") }
-					showUserListDialog("Followers", followerNames)
+					val followerIds = result.documents.map { it.id }
+					fetchUsernames(followerIds) { followerNames ->
+						showUserListDialog("Followers", followerNames)
+					}
 				}
 		}
 	}
@@ -166,8 +168,32 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		if (userId != null) {
 			db.collection("users").document(userId).collection("following").get()
 				.addOnSuccessListener { result ->
-					val followingNames = result.documents.map { it.id to (it.getString("username") ?: "Unknown") }
-					showUserListDialog("Following", followingNames)
+					val followingIds = result.documents.map { it.id }
+					fetchUsernames(followingIds) { followingNames ->
+						showUserListDialog("Following", followingNames)
+					}
+				}
+		}
+	}
+
+	private fun fetchUsernames(userIds: List<String>, callback: (List<Pair<String, String>>) -> Unit) {
+		val usernames = mutableListOf<Pair<String, String>>()
+		val db = FirebaseFirestore.getInstance()
+
+		for (userId in userIds) {
+			db.collection("users").document(userId).get()
+				.addOnSuccessListener { document ->
+					val username = document.getString("username") ?: "Unknown"
+					usernames.add(userId to username)
+					if (usernames.size == userIds.size) {
+						callback(usernames)
+					}
+				}
+				.addOnFailureListener {
+					usernames.add(userId to "Unknown")
+					if (usernames.size == userIds.size) {
+						callback(usernames)
+					}
 				}
 		}
 	}

@@ -136,6 +136,7 @@ class UploadFragment : Fragment() {
 					val post = Post(
 						id = postId,
 						userId = userId,
+						profileImageUrl = auth.currentUser?.photoUrl.toString(),
 						profileName = auth.currentUser?.displayName ?: "Anonymous",
 						imageUrl = uri.toString(),
 						description = description,
@@ -147,7 +148,6 @@ class UploadFragment : Fragment() {
 							progressBar.visibility = View.GONE
 							uploadButton.isEnabled = true
 							Toast.makeText(context, "Post uploaded", Toast.LENGTH_SHORT).show()
-							imageView.setImageResource(R.drawable.image_placeholder)
 							descriptionEditText.text.clear()
 							// Redirect to home screen
 							val intent = Intent(context, MainActivity::class.java)

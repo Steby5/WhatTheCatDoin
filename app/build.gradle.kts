@@ -15,8 +15,8 @@ android {
 		applicationId = "si.uni_lj.fe.whatthecatdoin"
 		minSdk = 26
 		targetSdk = 33
-		versionCode = 25
-		versionName = "2.5"
+		versionCode = 254
+		versionName = "2.5.4(test for 2.6)"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 	}
