@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-	namespace = "si.uni_lj.fe.whatthecatdoin"  // Add this line
+    namespace = "si.uni_lj.fe.whatthecatdoin"
 	compileSdk = 34
 
 	defaultConfig {
