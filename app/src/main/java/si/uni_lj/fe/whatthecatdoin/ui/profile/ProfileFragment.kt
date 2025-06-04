@@ -207,29 +207,32 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 		dialogFragment.show(parentFragmentManager, "post_detail")
 	}
 
-	private fun showPopupMenu() {
-		val popupMenu = PopupMenu(context as Context, usernameTextView)
-		popupMenu.menuInflater.inflate(R.menu.profile_menu, popupMenu.menu)
-		popupMenu.setOnMenuItemClickListener { item ->
-			when (item.itemId) {
-				R.id.changeUsername -> changeUsername()
-				R.id.changeEmail -> changeEmail()
-				R.id.changePassword -> changePassword()
-				R.id.deleteAccount -> showDeleteAccountConfirmationDialog()
-				R.id.banUser -> banUser()
-			}
-			true
-		}
-		popupMenu.show()
-
-		// Check if the user is an admin
-		auth.currentUser?.getIdToken(false)?.addOnSuccessListener { result ->
-			val isAdmin = result.claims["admin"] as? Boolean ?: false
-			if (isAdmin) {
-				popupMenu.menu.findItem(R.id.banUser).isVisible = true
-			}
-		}
-	}
+        private fun showPopupMenu() {
+                val popupMenu = PopupMenu(context as Context, usernameTextView)
+                popupMenu.menuInflater.inflate(R.menu.profile_menu, popupMenu.menu)
+                popupMenu.setOnMenuItemClickListener { item ->
+                        when (item.itemId) {
+                                R.id.changeUsername -> changeUsername()
+                                R.id.changeEmail -> changeEmail()
+                                R.id.changePassword -> changePassword()
+                                R.id.deleteAccount -> showDeleteAccountConfirmationDialog()
+                                R.id.banUser -> banUser()
+                        }
+                        true
+                }
+                // Check if the user is an admin
+                auth.currentUser?.getIdToken(false)
+                        ?.addOnSuccessListener { result ->
+                                val isAdmin = result.claims["admin"] as? Boolean ?: false
+                                if (isAdmin) {
+                                        popupMenu.menu.findItem(R.id.banUser).isVisible = true
+                                }
+                                popupMenu.show()
+                        }
+                        ?.addOnFailureListener {
+                                popupMenu.show()
+                        }
+        }
 
 	private fun changeUsername() {
 		val builder = AlertDialog.Builder(context)
