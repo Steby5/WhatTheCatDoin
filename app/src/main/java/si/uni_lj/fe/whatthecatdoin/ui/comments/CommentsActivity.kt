@@ -49,18 +49,21 @@ class CommentsActivity : AppCompatActivity() {
 		loadComments()
 	}
 
-	private fun loadComments() {
-		db.collection("posts").document(postId).collection("comments")
-			.get()
-			.addOnSuccessListener { result ->
-				commentList.clear()
-				for (document in result) {
-					val comment = document.toObject(Comment::class.java)
-					commentList.add(comment)
-				}
-				adapter.notifyDataSetChanged()
-			}
-	}
+        private fun loadComments() {
+                db.collection("posts").document(postId)
+                        .collection("comments")
+                        .orderBy("timestamp")
+                        .get()
+                        .addOnSuccessListener { result ->
+                                commentList.clear()
+                                for (document in result) {
+                                        val comment = document.toObject(Comment::class.java)
+                                        commentList.add(comment)
+                                }
+                                adapter.notifyDataSetChanged()
+                                recyclerView.scrollToPosition(commentList.size - 1)
+                        }
+        }
 
 	private fun addComment(text: String) {
 		val comment = Comment(
@@ -69,16 +72,19 @@ class CommentsActivity : AppCompatActivity() {
 			text = text,
 			timestamp = System.currentTimeMillis()
 		)
-		db.collection("posts").document(postId).collection("comments")
-			.add(comment)
-			.addOnSuccessListener {
-				commentList.add(comment)
-				adapter.notifyDataSetChanged()
-				findViewById<EditText>(R.id.commentEditText).text.clear()
-				Toast.makeText(this, "Comment added", Toast.LENGTH_SHORT).show()
-			}
-			.addOnFailureListener {
-				Toast.makeText(this, "Failed to add comment", Toast.LENGTH_SHORT).show()
-			}
+                db.collection("posts").document(postId)
+                        .collection("comments")
+                        .add(comment)
+                        .addOnSuccessListener {
+                                commentList.add(comment)
+                                commentList.sortBy { it.timestamp }
+                                adapter.notifyDataSetChanged()
+                                findViewById<EditText>(R.id.commentEditText).text.clear()
+                                recyclerView.scrollToPosition(commentList.size - 1)
+                                Toast.makeText(this, "Comment added", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener {
+                                Toast.makeText(this, "Failed to add comment", Toast.LENGTH_SHORT).show()
+                        }
 	}
 }

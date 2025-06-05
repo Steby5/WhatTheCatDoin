@@ -3,15 +3,15 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/toolbar"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
 		android:background="?attr/selectableItemBackground"
 		android:theme="?attr/actionBarTheme">
 
-		<Button
-			android:id="@+id/filterButton"
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/filterButton"
 			android:layout_width="130dp"
 			android:padding="5dp"
 			android:layout_height="wrap_content"
@@ -20,19 +20,29 @@
 			android:textColor="@android:color/white"
 			android:background="@drawable/rounded_rectangle"
 			android:backgroundTint="@color/primary"/>
-	</androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.MaterialToolbar>
 
-	<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-		android:id="@+id/swipeRefreshLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_below="@id/toolbar">
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeRefreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/toolbar">
 
-		<androidx.recyclerview.widget.RecyclerView
-			android:id="@+id/recyclerView"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent" />
-	</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <TextView
+                android:id="@+id/emptyStateTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="No posts to display"
+                android:visibility="gone"
+                android:textSize="18sp"
+                android:textColor="@color/black" />
 
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/scrollToTopButton"

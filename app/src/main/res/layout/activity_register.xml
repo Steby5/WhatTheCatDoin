@@ -63,8 +63,8 @@
 			android:textColorHint="@color/black"
 			android:layout_marginBottom="18dp"/>
 
-	<Button
-		android:id="@+id/createAccountButton"
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/createAccountButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Create Account"
@@ -72,8 +72,8 @@
 		android:backgroundTint="@color/secondary"
 		android:textColor="@color/black"
 		android:layout_margin="18dp"/>
-	<Button
-		android:id="@+id/loginButton"
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/loginButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Already have an account?"

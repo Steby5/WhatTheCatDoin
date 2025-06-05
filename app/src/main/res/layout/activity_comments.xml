@@ -21,8 +21,8 @@
 		android:textColorHint="@color/black"
 		android:hint="Write a comment" />
 
-	<Button
-		android:id="@+id/addCommentButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/addCommentButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:textColor="@color/black"

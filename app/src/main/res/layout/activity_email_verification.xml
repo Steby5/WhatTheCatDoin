@@ -14,15 +14,15 @@
 		android:textSize="18sp"
 		android:layout_marginBottom="16dp"/>
 
-	<Button
-		android:id="@+id/resendEmailButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/resendEmailButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="Resend Verification Email"
 		android:layout_marginBottom="16dp"/>
 
-	<Button
-		android:id="@+id/checkVerificationButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/checkVerificationButton"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="Check Verification Status"/>

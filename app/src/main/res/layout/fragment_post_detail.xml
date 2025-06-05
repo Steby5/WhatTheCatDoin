@@ -7,15 +7,15 @@
 	android:background="@drawable/rounded_rectangle"
 	android:backgroundTint="@color/secondary_variant">
 
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/toolbar"
+        <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
 		android:layout_width="match_parent"
 		android:layout_height="?attr/actionBarSize"
 		android:background="@drawable/rounded_rectangle"
 		android:backgroundTint="@color/secondary"
 		app:navigationIcon="@drawable/ic_back"
 		app:title="Post Details"
-		app:titleTextColor="@android:color/white" />
+                app:titleTextColor="@android:color/white" />
 
 	<ScrollView
 		android:layout_width="match_parent"

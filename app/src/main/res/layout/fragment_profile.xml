@@ -34,10 +34,10 @@
 			android:layout_alignParentStart="true"
 			android:layout_marginEnd="8dp"/>
 
-		<Button
-			android:id="@+id/logoutButton"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/logoutButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
 			android:background="@drawable/rounded_rectangle"
 			android:backgroundTint="@color/primary"
 			android:text="Logout" />

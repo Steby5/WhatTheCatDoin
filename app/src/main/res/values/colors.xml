@@ -1,8 +1,11 @@
 <resources>
-	<color name="primary">#CDB4DB</color>
-	<color name="primary_variant">#FFC8DD</color>
-	<color name="secondary">#A2D2FF</color>
-	<color name="secondary_variant">#C1E1C1</color>
-	<color name="white">#FFFFFF</color>
-	<color name="black">#000000</color>
+    <color name="primary">#6750A4</color>
+    <color name="onPrimary">#FFFFFF</color>
+    <color name="secondary">#005B4F</color>
+    <color name="onSecondary">#FFFFFF</color>
+    <color name="secondary_variant">#4E8C70</color>
+    <color name="surface">#FFFBFE</color>
+    <color name="onSurface">#1C1B1F</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 </resources>
