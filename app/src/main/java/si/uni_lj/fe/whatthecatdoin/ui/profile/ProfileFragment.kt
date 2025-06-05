@@ -372,21 +372,33 @@ class ProfileFragment : Fragment(), PostDetailFragment.PostDeleteListener {
 			.show()
 	}
 
-	private fun deleteUser(userId: String?) {
-		if (userId == null) return
-		db.collection("users").document(userId).delete()
-			.addOnSuccessListener {
-				db.collection("posts").whereEqualTo("userId", userId).get()
-					.addOnSuccessListener { result ->
-						for (document in result) {
-							db.collection("posts").document(document.id).delete()
-						}
-					}
-			}
-			.addOnFailureListener { e ->
-				Toast.makeText(context, "Failed to delete user: ${e.message}", Toast.LENGTH_SHORT).show()
-			}
-	}
+        private fun deleteUser(userId: String?) {
+                if (userId == null) return
+                db.collection("users").document(userId).delete()
+                        .addOnSuccessListener {
+                                db.collection("posts").whereEqualTo("userId", userId).get()
+                                        .addOnSuccessListener { result ->
+                                                for (document in result) {
+                                                        db.collection("posts").document(document.id).delete()
+                                                }
+
+                                                if (auth.currentUser?.uid == userId) {
+                                                        auth.currentUser?.delete()?.addOnCompleteListener { task ->
+                                                                if (task.isSuccessful) {
+                                                                        Toast.makeText(context, "Account deleted", Toast.LENGTH_SHORT).show()
+                                                                        startActivity(Intent(context, RegisterActivity::class.java))
+                                                                        activity?.finish()
+                                                                } else {
+                                                                        Toast.makeText(context, "Failed to delete account: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                                                }
+                                                        }
+                                                }
+                                        }
+                        }
+                        .addOnFailureListener { e ->
+                                Toast.makeText(context, "Failed to delete user: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+        }
 
 	private fun banUser() {
 		val userId = auth.currentUser?.uid ?: return
