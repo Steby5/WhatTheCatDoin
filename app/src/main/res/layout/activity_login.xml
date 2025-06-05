@@ -44,8 +44,8 @@
 		android:textColorHint="@color/black"
 		android:layout_marginBottom="18dp"/>
 
-	<Button
-		android:id="@+id/loginButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/loginButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Login"
@@ -54,8 +54,8 @@
 		android:textColor="@color/black"
 		android:layout_margin="18dp"/>
 
-	<Button
-		android:id="@+id/registerButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/registerButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Don't have an account? Register"
@@ -64,8 +64,8 @@
 		android:textColor="@color/black"
 		android:layout_margin="18dp"/>
 
-	<Button
-		android:id="@+id/resendVerificationButton"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/resendVerificationButton"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Resend Verification Email"

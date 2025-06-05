@@ -23,11 +23,12 @@ class HomeFragment : Fragment() {
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var adapter: RecyclerViewAdapter
 	private lateinit var postList: MutableList<Post>
-	private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-	private lateinit var filterButton: Button
-	private lateinit var scrollToTopButton: FloatingActionButton
-	private var showAllPosts: Boolean = true
-	private var isAdmin: Boolean = false
+        private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+        private lateinit var filterButton: Button
+        private lateinit var scrollToTopButton: FloatingActionButton
+        private lateinit var emptyStateTextView: View
+        private var showAllPosts: Boolean = true
+        private var isAdmin: Boolean = false
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -37,11 +38,12 @@ class HomeFragment : Fragment() {
 
 		db = FirebaseFirestore.getInstance()
 		auth = FirebaseAuth.getInstance()
-		recyclerView = view.findViewById(R.id.recyclerView)
-		swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
-		filterButton = view.findViewById(R.id.filterButton)
-		scrollToTopButton = view.findViewById(R.id.scrollToTopButton)
-		postList = mutableListOf()
+                recyclerView = view.findViewById(R.id.recyclerView)
+                swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout)
+                filterButton = view.findViewById(R.id.filterButton)
+                scrollToTopButton = view.findViewById(R.id.scrollToTopButton)
+                emptyStateTextView = view.findViewById(R.id.emptyStateTextView)
+                postList = mutableListOf()
 		adapter = RecyclerViewAdapter(postList)
 		recyclerView.layoutManager = LinearLayoutManager(context)
 		recyclerView.adapter = adapter
@@ -96,13 +98,14 @@ class HomeFragment : Fragment() {
 						val post = document.toObject(Post::class.java).copy(id = document.id)
 						postList.add(post)
 					}
-					postList.sortByDescending { it.timestamp }
-					adapter.notifyDataSetChanged()
-					onComplete?.invoke()
-				}
-				.addOnFailureListener {
-					onComplete?.invoke()
-				}
+                                        postList.sortByDescending { it.timestamp }
+                                        adapter.notifyDataSetChanged()
+                                        emptyStateTextView.visibility = if (postList.isEmpty()) View.VISIBLE else View.GONE
+                                        onComplete?.invoke()
+                                }
+                                .addOnFailureListener {
+                                        onComplete?.invoke()
+                                }
 		} else {
 			db.collection("users").document(userId).collection("following").get()
 				.addOnSuccessListener { result ->
@@ -115,20 +118,22 @@ class HomeFragment : Fragment() {
 									val post = document.toObject(Post::class.java).copy(id = document.id)
 									postList.add(post)
 								}
-								postList.sortByDescending { it.timestamp }
-								adapter.notifyDataSetChanged()
-								onComplete?.invoke()
-							}
-							.addOnFailureListener {
-								onComplete?.invoke()
-							}
-					} else {
-						postList.clear()
-						adapter.notifyDataSetChanged()
-						onComplete?.invoke()
-					}
-				}
-				.addOnFailureListener {
+                                                                postList.sortByDescending { it.timestamp }
+                                                                adapter.notifyDataSetChanged()
+                                                                emptyStateTextView.visibility = if (postList.isEmpty()) View.VISIBLE else View.GONE
+                                                                onComplete?.invoke()
+                                                        }
+                                                        .addOnFailureListener {
+                                                                onComplete?.invoke()
+                                                        }
+                                        } else {
+                                                postList.clear()
+                                                adapter.notifyDataSetChanged()
+                                                emptyStateTextView.visibility = View.VISIBLE
+                                                onComplete?.invoke()
+                                        }
+                                }
+                                .addOnFailureListener {
 					onComplete?.invoke()
 				}
 		}
@@ -136,6 +141,6 @@ class HomeFragment : Fragment() {
 
 	override fun onResume() {
 		super.onResume()
-		loadPosts()
+                loadPosts()
 	}
 }
